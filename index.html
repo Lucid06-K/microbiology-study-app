@@ -708,9 +708,32 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .tts-playback-info strong { color: var(--text); }
+    .tts-playback-speed {
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+    }
+    .tts-playback-speed input[type=range] {
+      width: 70px; height: 4px; cursor: pointer; accent-color: var(--primary);
+    }
+    .tts-playback-speed-label {
+      font-size: 0.72rem; font-weight: 600; color: var(--primary); min-width: 30px; text-align: center;
+    }
     .tts-playback-progress {
       flex: 1; height: 4px; background: var(--border); border-radius: 2px; min-width: 60px;
       cursor: pointer; position: relative;
+    }
+    /* Voice loading indicator */
+    .tts-loading-overlay {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      display: flex; align-items: center; gap: 10px; z-index: 60;
+      font-size: 0.85rem; color: var(--text); font-family: var(--font);
+      animation: slideUp 0.3s ease;
+    }
+    .tts-loading-overlay .spinner {
+      width: 18px; height: 18px; border: 2px solid var(--border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.6s linear infinite; flex-shrink: 0;
     }
     .tts-playback-progress-fill {
       height: 100%; background: var(--primary); border-radius: 2px;
@@ -6023,15 +6046,21 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }
         if (current.trim()) chunks.push(current.trim());
 
-        // Ensure voices are loaded - if not, wait and retry
+        // Ensure voices are loaded - if not, show indicator and wait
         if (tts.voices.length === 0) {
           loadBrowserVoices();
+          showVoiceLoadingIndicator();
           var retries = 0;
           var waitV = setInterval(function() {
             retries++;
-            if (tts.voices.length > 0 || retries > 20) {
+            if (tts.voices.length > 0) {
               clearInterval(waitV);
-              if (tts.voices.length > 0) doSpeak(text, cardIdx);
+              hideVoiceLoadingIndicator();
+              doSpeak(text, cardIdx);
+            } else if (retries > 25) {
+              clearInterval(waitV);
+              hideVoiceLoadingIndicator();
+              showVoiceErrorIndicator();
             }
           }, 200);
           return;
@@ -6170,16 +6199,23 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.paused = false;
       updateTTSButtons();
 
-      // Ensure voices loaded - if not, wait and retry
+      // Ensure voices loaded - if not, show loading indicator and wait
       if (tts.voices.length === 0) {
         loadBrowserVoices();
-        // Wait for voices then retry
+        showVoiceLoadingIndicator();
         var retryCount = 0;
         var waitForVoices = setInterval(function() {
           retryCount++;
-          if (tts.voices.length > 0 || retryCount > 20) {
+          if (tts.voices.length > 0) {
             clearInterval(waitForVoices);
-            if (tts.voices.length > 0) speakWithHighlighting(text, cardIdx);
+            hideVoiceLoadingIndicator();
+            speakWithHighlighting(text, cardIdx);
+          } else if (retryCount > 25) {
+            clearInterval(waitForVoices);
+            hideVoiceLoadingIndicator();
+            showVoiceErrorIndicator();
+            tts.speakingIdx = -1;
+            updateTTSButtons();
           }
         }, 200);
         return;
@@ -6365,6 +6401,9 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var bar = document.createElement('div');
       bar.id = 'ttsPlaybackBar';
       bar.className = 'tts-playback';
+      var currentRate = tts.rate / 175;
+      if (currentRate < 0.1 || currentRate > 3) currentRate = 1;
+
       bar.innerHTML =
         '<button class="tts-playback-btn" id="ttsPlayPauseBtn" onclick="tts.paused ? resumeTTS() : pauseTTS()">' +
           '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>' +
@@ -6373,6 +6412,10 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>' +
         '</button>' +
         '<div class="tts-playback-info"><strong>Reading:</strong> ' + escapeHTML(title) + '</div>' +
+        '<div class="tts-playback-speed" title="Speed">' +
+          '<input type="range" min="0.5" max="2" step="0.1" value="' + currentRate.toFixed(1) + '" oninput="changeTTSSpeed(this.value)">' +
+          '<span class="tts-playback-speed-label" id="ttsSpeedLabel">' + currentRate.toFixed(1) + 'x</span>' +
+        '</div>' +
         '<div class="tts-playback-progress" id="ttsProgressBar">' +
           '<div class="tts-playback-progress-fill" id="ttsProgressFill" style="width:0%"></div>' +
         '</div>' +
@@ -6398,6 +6441,44 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         var pct = Math.round((tts.currentWordIdx / tts.totalWords) * 100);
         fill.style.width = pct + '%';
       }
+    }
+
+    function changeTTSSpeed(val) {
+      var rate = parseFloat(val);
+      tts.rate = Math.round(rate * 175);
+      var label = document.getElementById('ttsSpeedLabel');
+      if (label) label.textContent = rate.toFixed(1) + 'x';
+      // Update the settings panel slider too
+      var rateInput = document.getElementById('ttsRate');
+      var rateVal = document.getElementById('rateVal');
+      if (rateInput) rateInput.value = tts.rate;
+      if (rateVal) rateVal.textContent = tts.rate;
+      localStorage.setItem('tts-mac-rate', tts.rate.toString());
+    }
+
+    function showVoiceLoadingIndicator() {
+      hideVoiceLoadingIndicator();
+      var el = document.createElement('div');
+      el.id = 'voiceLoadingIndicator';
+      el.className = 'tts-loading-overlay';
+      el.innerHTML = '<div class="spinner"></div> Loading voices, please wait...';
+      document.body.appendChild(el);
+    }
+
+    function hideVoiceLoadingIndicator() {
+      var el = document.getElementById('voiceLoadingIndicator');
+      if (el) el.remove();
+    }
+
+    function showVoiceErrorIndicator() {
+      hideVoiceLoadingIndicator();
+      var el = document.createElement('div');
+      el.id = 'voiceLoadingIndicator';
+      el.className = 'tts-loading-overlay';
+      el.style.borderColor = 'var(--error)';
+      el.innerHTML = 'No voices available. Try refreshing the page.';
+      document.body.appendChild(el);
+      setTimeout(function() { var e = document.getElementById('voiceLoadingIndicator'); if (e) e.remove(); }, 4000);
     }
 
     function finishTTSPlayback() {

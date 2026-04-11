@@ -1416,11 +1416,94 @@
     }
     .pomo-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
     .pomo-btn svg { width: 14px; height: 14px; pointer-events: none; }
-    .pomo-settings-btn {
-      background: none; border: none; color: rgba(255,255,255,0.4);
-      cursor: pointer; font-size: 0.65rem; margin-top: 2px; transition: color 0.15s;
+    /* ===== ONBOARDING TOUR ===== */
+    .tour-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0,0,0,0.75);
+      transition: opacity 0.3s;
     }
-    .pomo-settings-btn:hover { color: #fff; }
+    .tour-spotlight {
+      position: fixed; z-index: 10001;
+      border-radius: 10px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 30px 8px rgba(42,157,143,0.5), inset 0 0 20px rgba(42,157,143,0.15);
+      border: 2px solid rgba(42,157,143,0.8);
+      background: rgba(42,157,143,0.06);
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+      pointer-events: none;
+    }
+    .tour-tooltip {
+      position: fixed; z-index: 10002;
+      background: #fff; color: #1d3557;
+      border-radius: 14px;
+      padding: 20px 22px 16px;
+      max-width: 340px; width: calc(100vw - 40px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+      font-family: var(--font);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .tour-tooltip h3 {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;
+      color: #2a9d8f;
+    }
+    .tour-tooltip p {
+      font-size: 0.82rem; line-height: 1.55; color: #4a6a7a; margin-bottom: 12px;
+    }
+    .tour-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    }
+    .tour-dots {
+      display: flex; gap: 4px; flex-shrink: 1; min-width: 0; flex-wrap: wrap;
+    }
+    .tour-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #d4e6de; transition: all 0.2s; flex-shrink: 0;
+    }
+    .tour-dot.active { background: #2a9d8f; width: 14px; border-radius: 3px; }
+    .tour-btns { display: flex; gap: 5px; flex-shrink: 0; }
+    .tour-btn {
+      padding: 6px 14px; border: none; border-radius: 7px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      font-family: var(--font); transition: all 0.15s; white-space: nowrap;
+    }
+    .tour-btn.skip { background: none; color: #8a9faa; padding: 6px 8px; }
+    .tour-btn.skip:hover { color: #4a6a7a; }
+    .tour-btn.next { background: #2a9d8f; color: #fff; }
+    .tour-btn.next:hover { opacity: 0.9; }
+    .tour-btn.prev { background: #e8f0ed; color: #2a9d8f; }
+    .tour-btn.prev:hover { background: #d4e6de; }
+    .tour-welcome {
+      position: fixed; inset: 0; z-index: 10003;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6);
+    }
+    .tour-welcome-card {
+      background: #fff; border-radius: 18px; padding: 40px 44px; text-align: center;
+      max-width: 460px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      font-family: var(--font); color: #1d3557;
+    }
+    .tour-welcome-card .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+    .tour-welcome-card h2 { font-size: 1.5rem; margin-bottom: 8px; }
+    .tour-welcome-card p { font-size: 0.92rem; color: #5a7a8a; margin-bottom: 24px; line-height: 1.6; }
+    .tour-welcome-btns { display: flex; gap: 10px; justify-content: center; }
+    .tour-welcome-btn {
+      padding: 12px 28px; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      font-family: var(--font); transition: all 0.2s;
+    }
+    .tour-welcome-btn.start { background: #2a9d8f; color: #fff; }
+    .tour-welcome-btn.start:hover { opacity: 0.9; transform: translateY(-1px); }
+    .tour-welcome-btn.skip { background: #f0f7f4; color: #5a7a8a; }
+    .tour-welcome-btn.skip:hover { background: #e0ede8; }
+
+    .pomo-settings-btn {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7); border-radius: 6px;
+      cursor: pointer; font-size: 0.68rem; font-weight: 600; font-family: var(--font);
+      padding: 4px 14px; margin-top: 4px; transition: all 0.15s;
+    }
+    .pomo-settings-btn:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3); }
     .pomo-settings {
       width: 100%; display: none; flex-direction: column; gap: 6px;
       padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px;
@@ -1515,6 +1598,7 @@
       <div class="search-results-dropdown" id="searchDropdown"></div>
     </div>
     <div class="topbar-spacer"></div>
+    <button class="theme-toggle" id="tourBtn" onclick="startTour()" title="App tour" style="font-size:0.75rem;font-weight:700;">?</button>
     <button class="theme-toggle" id="ttsToggleBtn" onclick="toggleTTSPanel()" title="Text-to-Speech settings">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
     </button>
@@ -1798,7 +1882,7 @@
             content: `<p>The ancient merger that created eukaryotic cells was not a one-off event. <strong>Symbiosis</strong> -- organisms of different species living together in close association -- is happening all around us, right now, and it has enormous consequences for agriculture.</p>
 <p>Consider the <strong>mealybug</strong>, an insect that feeds on plant sap. Inside a specialised organ called a <strong>bacteriocyte</strong>, the mealybug houses not one but <em>two</em> different bacterial species nested inside each other like Russian dolls. A rod-shaped bacterium called <strong>Tremblaya</strong> lives inside the mealybug cell, and inside Tremblaya lives a round bacterium called <strong>Moranella</strong>. Together, these three organisms (mealybug + Tremblaya + Moranella) collaborate to produce the essential amino acids phenylalanine and tryptophan. None of them can do it alone -- each handles a different part of the biochemical pathway.</p>
 <p>In agriculture, the most famous symbiotic bacteria are the <strong>rhizobia</strong> that live in the root nodules of legumes (clover, soybeans, peas). These bacteria fix atmospheric nitrogen into forms that plants can use, essentially turning air into fertiliser. This is why farmers plant legumes as rotation crops -- to naturally replenish soil nitrogen.</p>
-<p>Another remarkable example: <strong>Wolbachia</strong> bacteria live symbiotically inside mosquitoes. Researchers at the University of Melbourne discovered that mosquitoes infected with Wolbachia cannot transmit <strong>dengue virus</strong> effectively. This led to a programme releasing Wolbachia-infected mosquitoes across northern Australia and Southeast Asia to reduce dengue transmission -- a clever use of bacterial symbiosis to fight human disease.</p>
+<p>Another remarkable example: <strong>Wolbachia</strong> bacteria live symbiotically inside mosquitoes. Researchers at Monash University discovered that mosquitoes infected with Wolbachia cannot transmit <strong>dengue virus</strong> effectively. This led to a programme releasing Wolbachia-infected mosquitoes across northern Australia and Southeast Asia to reduce dengue transmission -- a clever use of bacterial symbiosis to fight human disease.</p>
 <p>Even some diseases have a symbiotic twist. <strong>Phytoplasmas</strong> (bacteria that infect plants) cause the poinsettia's distinctive bushy shape and bright red leaves -- effects that are actually pathological but make the plant commercially desirable. The uninfected poinsettia is a tall, leggy, unattractive plant nobody would buy! However, phytoplasmas are devastating European vineyards, causing yellowing of grape leaves and destroying entire harvests with no known cure except ripping out the vines.</p>
 <div class="key-point"><strong>Key Takeaway:</strong> Symbiosis between microorganisms and their hosts is everywhere in agriculture -- from nitrogen-fixing rhizobia in legume roots to gut bacteria in ruminants. These partnerships can be beneficial (nitrogen fixation), neutral, or harmful (phytoplasmas in grapevines).</div>`
           },
@@ -1885,7 +1969,7 @@
 <p><strong>Desirable effects in plants:</strong> The tulip breaking virus creates the beautiful variegated colour patterns in tulips that people prize. In the 1600s, these infected tulips drove "Tulip Mania" in the Netherlands, where single bulbs sold for more than houses. The catch? After a few generations, the virus kills the plant. People invested fortunes in tulips that were doomed to die. The poinsettia's attractive bushy, red-leafed appearance is caused by a phytoplasma infection -- the "healthy" poinsettia is an unattractive leggy green plant nobody would buy.</p>
 <p><strong>Desirable effects in food:</strong> Blue cheese gets its distinctive flavour from <strong>Penicillium</strong> fungus deliberately introduced during production. Yoghurt, sauerkraut, kimchi, and sourdough bread all depend on bacterial fermentation. Beer and wine rely on yeast converting sugars to alcohol.</p>
 <p><strong>Undesirable effects:</strong> The same fungi that give us blue cheese will turn forgotten bread into a fuzzy mess. Phytoplasmas are destroying French vineyards with no cure in sight. Food spoilage costs agriculture billions annually. Bacterial and viral diseases devastate livestock and crops alike.</p>
-<p>Even vectors -- insects that transmit diseases -- have a microbial twist. Ticks and biting flies transmit bacterial and viral pathogens between animals. But Wolbachia bacteria inside mosquitoes can <em>prevent</em> dengue virus transmission. Bacteria called <strong>bacteriophages</strong> (viruses that infect bacteria) can carry toxin genes that make their bacterial hosts more virulent.</p>
+<p>Even vectors -- insects that transmit diseases -- have a microbial twist. Ticks and biting flies transmit bacterial and viral pathogens between animals. But Wolbachia bacteria inside mosquitoes can <em>prevent</em> dengue virus transmission. Viruses called <strong>bacteriophages</strong> (which infect bacteria) can carry toxin genes that make their bacterial hosts more virulent.</p>
 <div class="key-point"><strong>Key Takeaway:</strong> Microorganisms can be beneficial (food production, nitrogen fixation), harmful (disease, spoilage), or both depending on context. The same microbial processes that make cheese also spoil food; the same virus that makes tulips beautiful eventually kills them.</div>`
           }
         ],
@@ -2126,7 +2210,7 @@
         ,
 {q:"A lab technician applies a Gram stain to a bacterial smear and observes purple, chain-forming cocci under oil immersion. What is the most likely genus?",opts:["Staphylococcus", "Escherichia", "Streptococcus", "Pseudomonas"],ans:2,exp:"Gram-positive (purple) cocci growing in chains are characteristic of Streptococcus species. Staphylococci form clusters, while Escherichia and Pseudomonas are Gram-negative rods."},
 {q:"Why must bacteria be fixed to a slide before Gram staining?",opts:["To kill the bacteria so they cannot infect the technician", "To prevent the bacteria from being washed off during staining", "To make the bacteria absorb more crystal violet", "To flatten the bacteria so they are easier to see"],ans:1,exp:"Fixing bacteria to the slide (by drying and heat-fixing) ensures they adhere and are not washed away during the multiple staining and decolorisation steps of the Gram stain procedure."},
-{q:"A dairy farmer sends a milk sample to the lab. The culture grows golden-coloured colonies on blood agar with a zone of haemolysis around them. Which organism is most likely?",opts:["Streptococcus galactiae", "Pseudomonas aeruginosa", "Staphylococcus aureus", "Escherichia coli"],ans:2,exp:"Staphylococcus aureus produces golden-coloured colonies (aureus = golden in Latin) and causes haemolysis on blood agar. This bacterium is a common cause of mastitis in dairy cattle."},
+{q:"A dairy farmer sends a milk sample to the lab. The culture grows golden-coloured colonies on blood agar with a zone of haemolysis around them. Which organism is most likely?",opts:["Streptococcus agalactiae", "Pseudomonas aeruginosa", "Staphylococcus aureus", "Escherichia coli"],ans:2,exp:"Staphylococcus aureus produces golden-coloured colonies (aureus = golden in Latin) and causes haemolysis on blood agar. This bacterium is a common cause of mastitis in dairy cattle."},
 {q:"Which microscopy technique is required to visualise organisms as small as viruses?",opts:["Light microscopy with oil immersion", "Dark field microscopy", "Silver staining with light microscopy", "Electron microscopy"],ans:3,exp:"Viruses range from about 20-250 nm in diameter, far below the resolution limit of light microscopes. Electron microscopy is required to visualise individual viral particles."},
 {q:"A veterinary lab observes pink rod-shaped bacteria on a MacConkey agar plate that have turned the surrounding agar pink. What does this indicate?",opts:["The organism is Gram-positive and haemolytic", "The organism can survive bile salts and ferments lactose, suggesting E. coli", "The organism produces hydrogen sulphide, suggesting Salmonella", "The organism is a fungus producing pink pigment"],ans:1,exp:"MacConkey agar contains bile salts (selecting for enteric bacteria) and lactose with a pH indicator. Organisms that ferment lactose produce acid, turning colonies and surrounding agar pink. E. coli is the classic lactose-fermenting enteric bacterium."},
 {q:"What is the primary purpose of pasteurisation?",opts:["To sterilise the liquid and kill all microorganisms including spores", "To kill most pathogens and extend shelf life, though it does not achieve complete sterilisation", "To remove all organic matter from the liquid", "To make the liquid suitable for growing bacterial cultures"],ans:1,exp:"Pasteurisation heats liquids to around 72 degrees C for a short time, killing most pathogens but not achieving full sterilisation. Some thermotolerant bacteria and spores may survive. It was originally developed by Louis Pasteur to extend the shelf life of French wine."},
@@ -2151,7 +2235,7 @@
 <p>The names often tell you something about the organism:</p>
 <ul>
 <li><strong>Staphylococcus aureus</strong> -- "Staphyl" (Greek for grape cluster) describes how the cells clump together; "aureus" (Latin for golden) describes the colony colour</li>
-<li><strong>Streptococcus galactiae</strong> -- "Strepto" (chain) describes the chain arrangement; "galactiae" relates to reduced milk production (causes mastitis in dairy cows)</li>
+<li><strong>Streptococcus agalactiae</strong> -- "Strepto" (chain) describes the chain arrangement; "agalactiae" means "without milk" (a- = without, galactiae = milk) because it causes mastitis and reduced milk production in dairy cows</li>
 <li><strong>Escherichia coli</strong> -- Named after Theodor Escherich who discovered it; "coli" means it is found in the colon</li>
 <li><strong>Helicobacter pylori</strong> -- "Helico" (helical shape) + "pylori" (found in the pylorus of the stomach)</li>
 <li><strong>Lactobacillus</strong> -- Rod-shaped ("bacillus") bacteria that convert sugars to lactic acid ("lacto") -- the organisms that turn milk into yoghurt</li>
@@ -2298,7 +2382,7 @@
 {q:"A microbiologist isolates a bacterium and notices that its colony edge is smooth and shiny on agar. When they sequence the LPS genes, they find the LPS is full-length. If a mutation truncated the LPS, what change would they expect to see?",opts:["The colony would become golden in colour", "The colony would develop a rough, irregular edge", "The colony would produce haemolysis on blood agar", "The colony would stop growing entirely"],ans:1,exp:"Full-length LPS produces a smooth colony type. When LPS is truncated (through mutation), the colony morphology changes to a rough type with irregular edges. This is the smooth-to-rough transition described for Gram-negative bacteria."},
 {q:"Which bacterial genera are most associated with endospore formation?",opts:["Escherichia and Salmonella", "Staphylococcus and Streptococcus", "Bacillus and Clostridium", "Mycoplasma and Chlamydia"],ans:2,exp:"Bacillus and Clostridium are the most important spore-forming genera. Endospores are the most resistant form of life known, surviving heat, chemicals, drying, and radiation."},
 {q:"What does the name 'Staphylococcus aureus' tell us about the organism's morphology and appearance?",opts:["Rod-shaped bacteria that form chains and are white", "Spherical bacteria that form clusters and are golden", "Spiral-shaped bacteria that are red", "Oval bacteria that form pairs and are green"],ans:1,exp:"'Staphyl' means cluster (like grapes) in Greek, 'coccus' means spherical cell, and 'aureus' is Latin for golden. So the name describes golden, cluster-forming cocci."},
-{q:"A veterinarian isolates a bacterium from a horse with a wound infection. The fleece around the wound has a blue-green discolouration. Which organism is this most consistent with?",opts:["Staphylococcus aureus", "Bacillus anthracis", "Pseudomonas aeruginosa", "Streptococcus galactiae"],ans:2,exp:"Pseudomonas aeruginosa produces a blue-green pigment (the name 'aeruginosa' means copper rust in Latin, referring to this colour). This is visible both on laboratory cultures and in wound infections/fleece."},
+{q:"A veterinarian isolates a bacterium from a horse with a wound infection. The fleece around the wound has a blue-green discolouration. Which organism is this most consistent with?",opts:["Staphylococcus aureus", "Bacillus anthracis", "Pseudomonas aeruginosa", "Streptococcus agalactiae"],ans:2,exp:"Pseudomonas aeruginosa produces a blue-green pigment (the name 'aeruginosa' means copper rust in Latin, referring to this colour). This is visible both on laboratory cultures and in wound infections/fleece."},
 {q:"Why is the Gram stain considered the first and most fundamental step in bacterial identification?",opts:["It kills all bacteria, making them safe to handle", "It differentiates bacteria into two major groups (Gram-positive and Gram-negative) based on cell wall structure", "It identifies the exact species of bacteria", "It reveals whether bacteria have flagella"],ans:1,exp:"The Gram stain separates bacteria into Gram-positive (thick peptidoglycan, stain purple) and Gram-negative (thin peptidoglycan, stain pink) groups. Combined with morphology (shape and arrangement), it provides the first key classification step."},
 {q:"What is the key advantage of 16S ribosomal RNA gene sequencing for bacterial classification?",opts:["It changes rapidly, allowing differentiation of very closely related strains", "It is present in all self-replicating organisms and changes very slowly over time, enabling phylogenetic analysis", "It can only be sequenced in cultured bacteria", "It directly determines antibiotic resistance profiles"],ans:1,exp:"16S rRNA genes are present in all self-replicating organisms, providing a universal comparison point. They change very slowly over time (are highly conserved), making them ideal for constructing phylogenetic trees showing evolutionary relationships."},
 {q:"A capsule on a bacterial cell serves which primary functions?",opts:["Energy production and motility", "Protection from immune cells and prevention of desiccation", "DNA replication and protein synthesis", "Nutrient absorption and waste excretion"],ans:1,exp:"The capsule is a polysaccharide layer tightly attached to the cell surface that protects bacteria from being engulfed by immune cells (phagocytosis) and helps prevent the cell from drying out."},
@@ -2599,7 +2683,7 @@
           {
             title: "Tracing Foodborne Outbreaks: Molecular Epidemiology",
             content: `<p>The 2011 German outbreak investigation is a masterclass in molecular epidemiology -- and also a cautionary tale about jumping to conclusions.</p>
-<p>Initially, Spanish cucumbers were blamed. The consequences were devastating: Spain's agricultural exporters lost 120 million pounds per week. Russia banned all vegetable imports from Spain and Germany. Austria banned imports via Germany. The Spanish agriculture minister ate cucumbers on live TV to demonstrate confidence in her country's produce.</p>
+<p>Initially, Spanish cucumbers were blamed. The consequences were devastating: Spain's agricultural exporters lost 120 million pounds per week. Russia banned cucumber, tomato, and fresh salad imports from Spain and Germany. Austria banned imports via Germany. The Spanish agriculture minister ate cucumbers on live TV to demonstrate confidence in her country's produce.</p>
 <p>The real detective work relied on several lines of evidence:</p>
 <ol>
 <li><strong>Trade network analysis</strong> -- All 41 outbreak clusters traced back to a single sprout producer in Germany</li>
@@ -3258,7 +3342,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 <ul>
   <li><strong>Management</strong>: crutching, correct tail docking, shearing (removes olfactory stimuli), breeding for plainer-bodied sheep.</li>
   <li><strong>Mulesing</strong>: surgical removal of wrinkled skin; most effective method but highly controversial and increasingly restricted.</li>
-  <li><strong>Chemical control</strong>: growth regulators (cyromazin, dicyclanil), but <strong>resistance is now rampant</strong> across Australia.</li>
+  <li><strong>Chemical control</strong>: growth regulators (cyromazine, dicyclanil), but <strong>resistance is now rampant</strong> across Australia.</li>
   <li><strong>Research approaches</strong>: CRISPR gene knockouts, RNAi, sterile male technique (trialled on Kangaroo Island), olfactory gene targeting.</li>
 </ul>
 
@@ -3381,7 +3465,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
             title: "Growing Viruses: Eggs, Cell Culture, PCR, and Rapid Tests",
             content: `<p>Because viruses need living cells, growing them in the lab is much harder than growing bacteria. Over the decades, scientists developed progressively better methods:</p>
 
-<p><strong>1. Embryonated Eggs</strong>: A fertilised chicken egg is like a sealed, sterile apartment building full of different cell types. Scientists inject virus into various compartments (allantoic cavity, yolk sac, amnion, chorioallantoic membrane). This is still how <strong>flu vaccines</strong> are made \u2014 that is why they ask about egg allergies. However, it requires access to fertilised eggs, specialised facilities, and is time-consuming.</p>
+<p><strong>1. Embryonated Eggs</strong>: A fertilised chicken egg is like a sealed, sterile apartment building full of different cell types. Scientists inject virus into various compartments (allantoic cavity, yolk sac, amnion, chorioallantoic membrane). This is still how most <strong>flu vaccines</strong> are made \u2014 that is why they ask about egg allergies. However, it requires access to fertilised eggs, specialised facilities, and is time-consuming.</p>
 
 <p><strong>2. Cell Culture</strong>: In the 1950s\u201360s, scientists discovered they could harvest cells, spread them as a monolayer in flasks, and infect them with virus. Where virus kills cells, you see <strong>plaques</strong> \u2014 holes in the cell sheet, called <strong>cytopathic effects (CPE)</strong>. This is more convenient than eggs but still requires aseptic technique and infectious virus.</p>
 
@@ -3496,7 +3580,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         terms: [
           {term: "Virus", def: "A tiny infectious agent that can only replicate inside living cells; an obligate intracellular organism."},
           {term: "Obligate intracellular organism", def: "An organism that must be inside a living cell to reproduce."},
-          {term: "Embryonated egg", def: "A fertilised egg with a developing chick embryo, used to grow viruses. Still used for flu vaccine production."},
+          {term: "Embryonated egg", def: "A fertilised egg with a developing chick embryo, used to grow viruses. Still used for most flu vaccine production."},
           {term: "Cell culture", def: "Growing cells in laboratory flasks to provide host cells for virus replication."},
           {term: "Cytopathic effect (CPE)", def: "Visible damage/holes in a cell monolayer caused by virus infection."},
           {term: "Plaque", def: "A clear zone in a cell monolayer where virus has killed cells."},
@@ -3556,7 +3640,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 {q:"A student observes plaques (clear zones) in a cell monolayer infected with a virus. What do these plaques represent?",opts:["Areas of bacterial contamination", "Zones where the virus has infected and killed cells (cytopathic effect)", "Regions of increased cell growth stimulated by the virus", "Artifacts from the staining procedure"],ans:1,exp:"Viral plaques are clear zones in a cell monolayer where the virus has infected cells, replicated, and spread to neighbouring cells, causing cell death (cytopathic effect). The cells are destroyed, leaving holes in the otherwise confluent monolayer. Different viruses produce plaques of different sizes."},
 {q:"Why might rapid antigen tests (like those used for COVID-19) occasionally produce false negative results?",opts:["They detect nucleic acid rather than protein", "They may require a higher amount of antigen than is present in the sample, and viral antigens can mutate over time", "They are too sensitive and detect non-target antigens", "They can only detect dead virus particles"],ans:1,exp:"Rapid antigen tests have a trade-off in sensitivity and specificity. They need a sufficient amount of viral antigen to produce a positive result (lower sensitivity than PCR), and if viral antigens mutate, tests designed for older variants may not detect newer ones as effectively."},
 {q:"Which statement correctly describes the general replication strategy shared by ALL viruses?",opts:["Attachment to host cell, entry, release of nucleic acid, synthesis of new virions, and release from the cell", "Binary fission within the host cell cytoplasm", "Budding from the host cell membrane without cell damage", "Independent replication in the extracellular environment"],ans:0,exp:"All viruses follow the same basic replication strategy: attachment to the host cell surface, penetration/entry into the cell, release (uncoating) of nucleic acid, synthesis/assembly of new viral components using host cell machinery, and release of new virions (either by budding or cell lysis)."},
-{q:"Sheeppox, goatpox, and lumpy skin disease are all caused by capripox viruses. Unlike herpes viruses, pox viruses can spread through contaminated scab material in the environment. What property of pox viruses enables this?",opts:["Pox viruses are enveloped and fragile, requiring direct contact", "Pox viruses are non-enveloped and environmentally resilient, allowing indirect transmission via contaminated material", "Pox viruses only replicate in the environment", "Pox viruses have a shorter incubation period than herpes viruses"],ans:1,exp:"Pox viruses produce scab material laden with infectious virus particles. These viruses are environmentally resilient (unlike fragile enveloped herpes viruses), allowing indirect transmission when susceptible animals contact contaminated scabs, fomites, or environmental surfaces. This makes environmental decontamination particularly important."}]
+{q:"Sheeppox, goatpox, and lumpy skin disease are all caused by capripox viruses. Unlike herpes viruses, pox viruses can spread through contaminated scab material in the environment. What property of pox viruses enables this?",opts:["Pox viruses are non-enveloped and fragile, requiring direct contact", "Pox viruses are enveloped but environmentally resilient due to their complex structure, allowing indirect transmission via contaminated material", "Pox viruses only replicate in the environment", "Pox viruses have a shorter incubation period than herpes viruses"],ans:1,exp:"Pox viruses are enveloped, but unlike simple enveloped viruses such as herpes, they have a complex multi-layered structure that makes them environmentally resilient. They produce scab material laden with infectious virus particles that can persist and allow indirect transmission when susceptible animals contact contaminated scabs, fomites, or environmental surfaces. This makes environmental decontamination particularly important."}]
       },
 
       // -------------------------------------------------------
@@ -4421,7 +4505,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 <ul>
   <li><strong>Physical defences</strong> \u2014 callose deposition at infection sites (reinforcing cell walls), cell wall lignification.</li>
   <li><strong>Pre-existing antimicrobials</strong> \u2014 terpenoids (essential oils), phenolics, alkaloids. Production increases upon infection.</li>
-  <li><strong>Induced-only compounds</strong> \u2014 defensins (antimicrobial proteins), protease inhibitors (anti-insect), chitinases (anti-fungal), glucanases (anti-Mucoromycota), lysozymes (anti-bacterial). These are expensive to produce and only made when needed.</li>
+  <li><strong>Induced-only compounds</strong> \u2014 defensins (antimicrobial proteins), protease inhibitors (anti-insect), chitinases (anti-fungal), glucanases (anti-Oomycota), lysozymes (anti-bacterial). These are expensive to produce and only made when needed.</li>
 </ul>
 
 <div class="key-point"><strong>Key Takeaway:</strong> Disease causes immediate non-visual changes: decreased photosynthesis, increased respiration, elevated canopy temperature, and production of defensive chemicals. These hidden symptoms often precede any visible signs of disease.</div>`
@@ -4493,7 +4577,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           "PTI and ETI are not strictly separate \u2014 they overlap and reinforce each other.",
           "Diseased plants show decreased photosynthesis, increased respiration, and elevated canopy temperature before visible symptoms.",
           "Callose deposition at infection sites is a physical induced defence response.",
-          "Chitinases target fungal cell walls; glucanases target Mucoromycota; lysozymes target bacteria.",
+          "Chitinases target fungal cell walls; glucanases target Oomycota; lysozymes target bacteria.",
           "Plants can release volatiles to attract predatory insects that eat herbivores (tritrophic interaction).",
           "Some viruses manipulate plant volatile release to attract vectors and induce anti-feeding compounds to encourage vectors to move on, enhancing transmission."
         ],
@@ -6625,10 +6709,203 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       }
     }
 
+    // ==========================================
+    // ONBOARDING TOUR
+    // ==========================================
+    var tourSteps = [
+      { target: '#dashboardBtn', title: 'Dashboard', text: 'This is your home base. See your overall progress, start mock exams, flashcards, and find your weak areas all in one place.' },
+      { target: '#sidebarNav', title: 'Weekly Lectures', text: 'All 13 lectures are organised by week. Click any lecture to open it. The coloured dots show your progress: grey = not started, yellow = in progress, green = mastered.' },
+      { target: '#searchInput', title: 'Search Everything', text: 'Search across all explanations, terms, and facts instantly. Results link directly to the right lecture and tab.' },
+      { target: '#ttsToggleBtn', title: 'Text-to-Speech', text: 'Click here to configure text-to-speech. Each explanation card has a speaker button that reads the content aloud using your Mac\'s voices.' },
+      { target: '#themeToggle', title: 'Dark / Light Mode', text: 'Toggle between light and dark themes. Your preference is saved automatically.' },
+      { target: '#tourBtn', title: 'App Tour', text: 'You can replay this tour anytime by clicking this button.' },
+      { target: '.pomo-container', title: 'Pomodoro Timer', text: '25-minute focus sessions with breaks built in. Customise the durations in Settings. When a session ends, a full-screen overlay forces you to take your break.' },
+      { target: null, title: 'Lecture Tabs', text: 'Each lecture has 5 tabs:\n\n<b>Learn</b> -- Detailed explanations with diagrams and analogies\n<b>Terms</b> -- Searchable glossary of key vocabulary\n<b>Facts</b> -- Quick-reference bullet points\n<b>Quiz</b> -- 20 multiple choice + 5 short answer questions\n<b>Flashcards</b> -- Flip cards with spaced repetition', virtual: true },
+      { target: null, title: 'Keyboard Shortcuts', text: 'Press <b>?</b> anytime to see all keyboard shortcuts.\n\nArrow keys navigate lectures, <b>1-5</b> switch tabs, <b>Space</b> flips flashcards, <b>S</b> opens search, <b>D</b> goes to dashboard.', virtual: true },
+      { target: null, title: 'You\'re all set!', text: 'Your progress saves automatically in the browser -- quizzes, flashcard mastery, exam history, everything.\n\nGood luck with your studies! Start by clicking a lecture in the sidebar.', virtual: true, last: true },
+    ];
+    var tourCurrent = 0;
+    var tourActive = false;
+
+    function startTour() {
+      tourCurrent = 0;
+      tourActive = true;
+      // Make sure we're on dashboard
+      showDashboard();
+      // Show welcome screen
+      showTourWelcome();
+    }
+
+    function showTourWelcome() {
+      var existing = document.getElementById('tourWelcome');
+      if (existing) existing.remove();
+      var el = document.createElement('div');
+      el.id = 'tourWelcome';
+      el.className = 'tour-welcome';
+      el.innerHTML =
+        '<div class="tour-welcome-card">' +
+          '<span class="emoji">&#x1F52C;</span>' +
+          '<h2>Welcome to MicroStudy!</h2>' +
+          '<p>Your complete study companion for Microbiology in Agriculture. Let me show you around -- it only takes 30 seconds.</p>' +
+          '<div class="tour-welcome-btns">' +
+            '<button class="tour-welcome-btn skip" onclick="endTour()">Skip</button>' +
+            '<button class="tour-welcome-btn start" onclick="beginTourSteps()">Show me around</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(el);
+    }
+
+    function beginTourSteps() {
+      var welcome = document.getElementById('tourWelcome');
+      if (welcome) welcome.remove();
+      tourCurrent = 0;
+      showTourStep();
+    }
+
+    function showTourStep() {
+      // Remove old elements
+      var oldOverlay = document.getElementById('tourOverlay');
+      var oldSpotlight = document.getElementById('tourSpotlight');
+      var oldTooltip = document.getElementById('tourTooltip');
+      if (oldOverlay) oldOverlay.remove();
+      if (oldSpotlight) oldSpotlight.remove();
+      if (oldTooltip) oldTooltip.remove();
+
+      if (tourCurrent >= tourSteps.length) { endTour(); return; }
+
+      var step = tourSteps[tourCurrent];
+
+      // Overlay
+      var overlay = document.createElement('div');
+      overlay.id = 'tourOverlay';
+      overlay.className = 'tour-overlay';
+      document.body.appendChild(overlay);
+
+      // Spotlight and tooltip positioning
+      var targetEl = step.target ? document.querySelector(step.target) : null;
+      var rect = null;
+
+      if (targetEl) {
+        rect = targetEl.getBoundingClientRect();
+        var pad = 12;
+        var spotlight = document.createElement('div');
+        spotlight.id = 'tourSpotlight';
+        spotlight.className = 'tour-spotlight';
+        spotlight.style.top = (rect.top - pad) + 'px';
+        spotlight.style.left = (rect.left - pad) + 'px';
+        spotlight.style.width = (rect.width + pad * 2) + 'px';
+        spotlight.style.height = (rect.height + pad * 2) + 'px';
+        document.body.appendChild(spotlight);
+      }
+
+      // Tooltip
+      var tooltip = document.createElement('div');
+      tooltip.id = 'tourTooltip';
+      tooltip.className = 'tour-tooltip';
+
+      // Dots
+      var dotsHTML = '<div class="tour-dots">';
+      for (var i = 0; i < tourSteps.length; i++) {
+        dotsHTML += '<div class="tour-dot ' + (i === tourCurrent ? 'active' : '') + '"></div>';
+      }
+      dotsHTML += '</div>';
+
+      var prevBtn = tourCurrent > 0 ? '<button class="tour-btn prev" onclick="tourPrev()">Back</button>' : '';
+      var nextLabel = step.last ? 'Get Started' : 'Next';
+      var stepText = step.text.replace(/\n/g, '<br>');
+
+      tooltip.innerHTML =
+        '<h3>' + step.title + '</h3>' +
+        '<p>' + stepText + '</p>' +
+        '<div class="tour-footer">' +
+          dotsHTML +
+          '<div class="tour-btns">' +
+            '<button class="tour-btn skip" onclick="endTour()">Skip</button>' +
+            prevBtn +
+            '<button class="tour-btn next" onclick="tourNext()">' + nextLabel + '</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(tooltip);
+
+      // Position tooltip - always clamped within viewport
+      var tooltipRect = tooltip.getBoundingClientRect();
+      var margin = 12;
+      var maxW = window.innerWidth - margin * 2;
+      var maxH = window.innerHeight - margin * 2;
+
+      // Clamp tooltip size
+      if (tooltipRect.width > maxW) tooltip.style.maxWidth = maxW + 'px';
+
+      if (rect) {
+        tooltipRect = tooltip.getBoundingClientRect();
+        var top, left;
+
+        // Try below target first
+        top = rect.bottom + 12;
+        left = rect.left;
+
+        // If below doesn't fit, try above
+        if (top + tooltipRect.height > window.innerHeight - margin) {
+          top = rect.top - tooltipRect.height - 12;
+        }
+        // If above doesn't fit either, center vertically
+        if (top < margin) {
+          top = Math.max(margin, (window.innerHeight - tooltipRect.height) / 2);
+          // Place to the right of target if possible
+          left = rect.right + 12;
+        }
+
+        // Clamp left/right
+        if (left + tooltipRect.width > window.innerWidth - margin) {
+          left = window.innerWidth - tooltipRect.width - margin;
+        }
+        if (left < margin) left = margin;
+        // Clamp top/bottom
+        if (top < margin) top = margin;
+        if (top + tooltipRect.height > window.innerHeight - margin) {
+          top = window.innerHeight - tooltipRect.height - margin;
+        }
+
+        tooltip.style.top = top + 'px';
+        tooltip.style.left = left + 'px';
+      } else {
+        // Center for virtual steps - set position directly, no transform
+        var cTop = Math.round((window.innerHeight - tooltipRect.height) / 2);
+        var cLeft = Math.round((window.innerWidth - tooltipRect.width) / 2);
+        if (cTop < margin) cTop = margin;
+        if (cLeft < margin) cLeft = margin;
+        tooltip.style.top = cTop + 'px';
+        tooltip.style.left = cLeft + 'px';
+      }
+    }
+
+    function tourNext() {
+      tourCurrent++;
+      if (tourCurrent >= tourSteps.length) { endTour(); return; }
+      showTourStep();
+    }
+
+    function tourPrev() {
+      if (tourCurrent > 0) tourCurrent--;
+      showTourStep();
+    }
+
+    function endTour() {
+      tourActive = false;
+      localStorage.setItem('tour-done', 'true');
+      var ids = ['tourWelcome', 'tourOverlay', 'tourSpotlight', 'tourTooltip'];
+      ids.forEach(function(id) { var el = document.getElementById(id); if (el) el.remove(); });
+    }
+
     // Start the app
     document.addEventListener('DOMContentLoaded', function() {
       init();
       initPomodoro();
+      // Show tour on first launch only
+      if (!localStorage.getItem('tour-done')) {
+        setTimeout(function() { startTour(); }, 500);
+      }
     });
   </script>
 </body>

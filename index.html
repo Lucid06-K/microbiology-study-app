@@ -5696,13 +5696,35 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       serverAvailable: false,
     };
 
+    // Novelty voices to hide from the list
+    var NOVELTY_VOICES = ['Albert','Bad News','Bahh','Bells','Boing','Bubbles','Cellos',
+      'Good News','Jester','Junior','Organ','Superstar','Trinoids','Whisper','Zarvox','Wobble','Fred','Ralph','Kathy'];
+
     function loadMacVoices() {
       fetch('/api/voices').then(function(r) {
         if (!r.ok) throw new Error('no server');
         return r.json();
       }).then(function(voices) {
-        tts.voices = voices;
+        // Filter out novelty voices and deduplicate
+        var seen = {};
+        tts.voices = voices.filter(function(v) {
+          if (NOVELTY_VOICES.indexOf(v.name) >= 0) return false;
+          if (seen[v.name]) return false;
+          seen[v.name] = true;
+          return true;
+        });
+        // Sort: premium > enhanced > standard
+        var order = {premium: 0, enhanced: 1, standard: 2};
+        tts.voices.sort(function(a, b) {
+          var aO = order[a.quality] !== undefined ? order[a.quality] : 2;
+          var bO = order[b.quality] !== undefined ? order[b.quality] : 2;
+          if (aO !== bO) return aO - bO;
+          return a.name.localeCompare(b.name);
+        });
         tts.serverAvailable = true;
+        // Auto-select best voice if current not found
+        var found = tts.voices.find(function(v) { return v.name === tts.voice; });
+        if (!found && tts.voices.length > 0) tts.voice = tts.voices[0].name;
         var sel = document.getElementById('voiceSelect');
         if (sel) populateVoiceSelect(sel);
       }).catch(function() {

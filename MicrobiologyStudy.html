@@ -6023,12 +6023,22 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }
         if (current.trim()) chunks.push(current.trim());
 
-        // Ensure voices are loaded
-        if (tts.voices.length === 0) loadBrowserVoices();
+        // Ensure voices are loaded - if not, wait and retry
+        if (tts.voices.length === 0) {
+          loadBrowserVoices();
+          var retries = 0;
+          var waitV = setInterval(function() {
+            retries++;
+            if (tts.voices.length > 0 || retries > 20) {
+              clearInterval(waitV);
+              if (tts.voices.length > 0) doSpeak(text, cardIdx);
+            }
+          }, 200);
+          return;
+        }
 
         var chunkIdx = 0;
         var selectedVoice = tts.voices.find(function(v) { return v.name === tts.voice; });
-        // Fallback: if saved voice not found, use first available
         if (!selectedVoice && tts.voices.length > 0) selectedVoice = tts.voices[0];
         var speechRate = tts.rate / 175; // convert WPM to rate multiplier
         if (speechRate < 0.1) speechRate = 1;
@@ -6160,11 +6170,24 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.paused = false;
       updateTTSButtons();
 
-      // Ensure voices loaded
-      if (tts.voices.length === 0) loadBrowserVoices();
+      // Ensure voices loaded - if not, wait and retry
+      if (tts.voices.length === 0) {
+        loadBrowserVoices();
+        // Wait for voices then retry
+        var retryCount = 0;
+        var waitForVoices = setInterval(function() {
+          retryCount++;
+          if (tts.voices.length > 0 || retryCount > 20) {
+            clearInterval(waitForVoices);
+            if (tts.voices.length > 0) speakWithHighlighting(text, cardIdx);
+          }
+        }, 200);
+        return;
+      }
 
       var selectedVoice = tts.voices.find(function(v) { return v.name === tts.voice; });
       if (!selectedVoice && tts.voices.length > 0) selectedVoice = tts.voices[0];
+      console.log('TTS: ' + tts.voices.length + ' voices, using: ' + (selectedVoice ? selectedVoice.name : 'NONE') + ', text length: ' + text.length);
       var speechRate = tts.rate / 175;
       if (speechRate < 0.1 || speechRate > 3) speechRate = 1;
       var pitch = parseFloat(localStorage.getItem('tts-pitch') || '1');

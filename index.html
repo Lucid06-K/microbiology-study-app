@@ -6166,12 +6166,8 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
     function toggleTTS(idx) {
       if (tts.speakingIdx === idx) {
-        // Toggle pause/resume
-        if (tts.paused) {
-          resumeTTS();
-        } else {
-          pauseTTS();
-        }
+        // Stop TTS if already playing this card
+        stopTTS();
         return;
       }
       // Stop any current speech

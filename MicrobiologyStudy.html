@@ -746,19 +746,42 @@
     .tts-playback-close:hover { color: var(--text); }
 
     /* Word highlighting */
-    .tts-sentence {
-      cursor: pointer;
-      transition: background 0.25s, border-color 0.25s;
-      border-radius: 6px;
-      padding: 4px 6px;
-      margin: 2px 0;
-      display: inline;
-      border-left: 3px solid transparent;
+    /* TTS sentence tracker - shown above the original content */
+    .tts-tracker {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-light);
     }
-    .tts-sentence:hover { background: var(--primary-light); }
-    .tts-sentence.speaking {
-      background: rgba(42,157,143,0.12);
-      border-left-color: var(--primary);
+    .tts-tracker-sentence {
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+      display: inline;
+    }
+    .tts-tracker-sentence:hover { background: var(--primary-light); }
+    .tts-tracker-sentence.speaking {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 4px;
+    }
+    .tts-tracker-sentence.spoken {
+      color: var(--text);
+    }
+    .tts-tracker-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
     }
 
     /* Fallback for smaller screens */
@@ -5773,14 +5796,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     var tts = {
       speakingIdx: -1,
-      voice: localStorage.getItem('tts-mac-voice') || 'Samantha',
+      voice: localStorage.getItem('tts-mac-voice') || 'Google UK English Male',
       rate: parseInt(localStorage.getItem('tts-mac-rate') || '175'),
       voices: [],
       currentAudio: null,
       serverAvailable: false,
       paused: false,
       currentCardIdx: -1,
-      originalHTML: '',
       sentences: [],
       sentenceElements: [],
       currentSentenceIdx: 0,
@@ -5971,6 +5993,26 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       stopTTS();
       var sampleEl = document.getElementById('voiceSampleText');
       var text = sampleEl ? sampleEl.textContent : 'This is a test of the text to speech voice.';
+
+      // If no voices loaded yet, show loading indicator
+      if (!tts.serverAvailable && tts.voices.length === 0) {
+        loadBrowserVoices();
+        showVoiceLoadingIndicator();
+        var retries = 0;
+        var waitV = setInterval(function() {
+          retries++;
+          if (tts.voices.length > 0) {
+            clearInterval(waitV);
+            hideVoiceLoadingIndicator();
+            doSpeak(text, -1);
+          } else if (retries > 25) {
+            clearInterval(waitV);
+            hideVoiceLoadingIndicator();
+            showVoiceErrorIndicator();
+          }
+        }, 200);
+        return;
+      }
       doSpeak(text, -1);
     }
 
@@ -6158,17 +6200,23 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.totalSentences = sentences.length;
       tts.currentSentenceIdx = 0;
 
-      // Wrap sentences in the card body for highlighting
+      // Add a sentence tracker ABOVE the original content (don't replace it)
       var bodyEl = card ? card.querySelector('.explanation-card-body') : null;
       if (bodyEl) {
-        tts.originalHTML = bodyEl.innerHTML;
-        var sentHTML = '<div style="font-size:0.93rem;line-height:1.9;padding:8px 0;">';
+        // Remove any existing tracker
+        var oldTracker = bodyEl.querySelector('.tts-tracker');
+        if (oldTracker) oldTracker.remove();
+
+        var tracker = document.createElement('div');
+        tracker.className = 'tts-tracker';
+        tracker.id = 'ttsTracker';
+        var trackerHTML = '<div class="tts-tracker-label">Now reading</div>';
         sentences.forEach(function(s, i) {
-          sentHTML += '<span class="tts-sentence" data-sent-idx="' + i + '" onclick="jumpToSentence(' + idx + ',' + i + ')">' + escapeHTML(s) + '</span> ';
+          trackerHTML += '<span class="tts-tracker-sentence" data-sent-idx="' + i + '" onclick="jumpToSentence(' + idx + ',' + i + ')">' + escapeHTML(s) + ' </span>';
         });
-        sentHTML += '</div>';
-        bodyEl.innerHTML = sentHTML;
-        tts.sentenceElements = bodyEl.querySelectorAll('.tts-sentence');
+        tracker.innerHTML = trackerHTML;
+        bodyEl.insertBefore(tracker, bodyEl.firstChild);
+        tts.sentenceElements = tracker.querySelectorAll('.tts-tracker-sentence');
       }
 
       // Show playback bar
@@ -6347,12 +6395,17 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.rate = Math.round(rate * 175);
       var label = document.getElementById('ttsSpeedLabel');
       if (label) label.textContent = rate.toFixed(1) + 'x';
-      // Update the settings panel slider too
       var rateInput = document.getElementById('ttsRate');
       var rateVal = document.getElementById('rateVal');
       if (rateInput) rateInput.value = tts.rate;
       if (rateVal) rateVal.textContent = tts.rate;
       localStorage.setItem('tts-mac-rate', tts.rate.toString());
+
+      // Restart speech at new speed from current sentence
+      if (tts.speakingIdx >= 0 && tts.sentences.length > 0 && !tts.serverAvailable) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        speakSentences(tts.currentCardIdx, tts.currentSentenceIdx);
+      }
     }
 
     function showVoiceLoadingIndicator() {
@@ -6386,18 +6439,10 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.currentSentenceIdx = 0;
       updateTTSButtons();
 
-      // Remove highlighting
-      if (tts.sentenceElements) {
-        tts.sentenceElements.forEach(function(el) { el.classList.remove('speaking'); });
-      }
+      // Remove the tracker div (original content was never modified)
+      var tracker = document.getElementById('ttsTracker');
+      if (tracker) tracker.remove();
 
-      // Restore original HTML
-      var card = document.getElementById('expCard-' + tts.currentCardIdx);
-      if (card && tts.originalHTML) {
-        var bodyEl = card.querySelector('.explanation-card-body');
-        if (bodyEl) bodyEl.innerHTML = tts.originalHTML;
-      }
-      tts.originalHTML = '';
       tts.sentenceElements = [];
       tts.sentences = [];
 

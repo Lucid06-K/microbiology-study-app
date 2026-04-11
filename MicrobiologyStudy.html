@@ -5139,7 +5139,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function stripHTML(html) {
-      return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      // Remove SVGs, diagrams, tables, figures, and key-point boxes before stripping tags
+      html = html.replace(/<svg[\s\S]*?<\/svg>/gi, '');
+      html = html.replace(/<div class="diagram"[\s\S]*?<\/div>\s*<\/div>/gi, '');
+      html = html.replace(/<table[\s\S]*?<\/table>/gi, '');
+      html = html.replace(/<div class="key-point"[\s\S]*?<\/div>/gi, '');
+      html = html.replace(/Figure:.*?(?=<|$)/gi, '');
+      return html.replace(/<[^>]*>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#\d+;/g, '').replace(/\s+/g, ' ').trim();
     }
 
     function truncate(text, len) {

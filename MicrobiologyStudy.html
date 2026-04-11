@@ -5823,10 +5823,21 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       function doLoad() {
         var allVoices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('en'); });
         if (allVoices.length === 0) {
-          // Retry after a delay -- some browsers load voices very slowly
           setTimeout(doLoad, 500);
           return;
         }
+
+        // Filter out novelty voices and deduplicate
+        var seen = {};
+        allVoices = allVoices.filter(function(v) {
+          if (NOVELTY_VOICES.indexOf(v.name) >= 0) return false;
+          // Also filter by partial match for names like "Bad News", etc.
+          var simpleName = v.name.replace(/\s*\(.*?\)\s*/g, '').trim();
+          if (NOVELTY_VOICES.indexOf(simpleName) >= 0) return false;
+          if (seen[v.name]) return false;
+          seen[v.name] = true;
+          return true;
+        });
 
         // Score and sort voices by quality
         tts.voices = allVoices.map(function(v) {
@@ -5836,7 +5847,6 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           else if (v.name.indexOf('Premium') >= 0 || v.name.indexOf('Natural') >= 0) quality = 'premium';
           else if (v.name.indexOf('Enhanced') >= 0) quality = 'enhanced';
           else if (v.name.indexOf('Online') >= 0) quality = 'online';
-          // Score: preferred list rank first, then quality tier
           var score = rank >= 0 ? rank : 100;
           if (quality === 'google') score = Math.min(score, 5);
           else if (quality === 'premium') score = Math.min(score, 10);

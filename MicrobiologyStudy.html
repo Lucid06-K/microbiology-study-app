@@ -1784,7 +1784,8 @@
     <div class="tts-panel-title">Text-to-Speech Settings</div>
     <div class="voice-controls">
       <div class="voice-field" style="min-width:100%;"><label>Voice</label><select id="voiceSelect" onchange="tts.voice=this.value"></select></div>
-      <div class="voice-field" style="min-width:100%;"><label>Speed (words/min)</label><div class="range-row"><input type="range" id="ttsRate" min="100" max="300" step="5" oninput="tts.rate=parseInt(this.value);document.getElementById('rateVal').textContent=this.value" style="flex:1;"><span class="range-val" id="rateVal">175</span></div></div>
+      <div class="voice-field" style="min-width:100%;"><label>Speed</label><div class="range-row"><input type="range" id="ttsRate" min="100" max="300" step="5" oninput="tts.rate=parseInt(this.value);document.getElementById('rateVal').textContent=this.value" style="flex:1;"><span class="range-val" id="rateVal">175</span></div></div>
+      <div class="voice-field" style="min-width:100%;"><label>Pitch</label><div class="range-row"><input type="range" id="ttsPitch" min="0.5" max="1.5" step="0.1" value="1" oninput="localStorage.setItem('tts-pitch',this.value);document.getElementById('pitchVal').textContent=parseFloat(this.value).toFixed(1)" style="flex:1;"><span class="range-val" id="pitchVal">1.0</span></div></div>
       <div class="voice-test-btns" style="width:100%;justify-content:flex-start;">
         <button class="voice-test-btn play" onclick="testVoice()">Test Voice</button>
         <button class="voice-test-btn stop" onclick="stopTTS()" id="testStopBtn" style="display:none;">Stop</button>
@@ -5710,20 +5711,58 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       });
     }
 
+    // Best-sounding voices ranked by quality (checked across OS/browser combos)
+    var PREFERRED_VOICES = [
+      // Google online voices (Chrome) - very natural
+      'Google UK English Female', 'Google UK English Male', 'Google US English',
+      // macOS premium/enhanced
+      'Zoe (Premium)', 'Samantha (Enhanced)', 'Karen (Enhanced)', 'Daniel (Enhanced)',
+      'Jamie (Premium)', 'Lee (Premium)', 'Tom (Enhanced)', 'Stephanie (Premium)',
+      // macOS standard but decent
+      'Samantha', 'Karen', 'Daniel', 'Moira',
+      // Windows natural voices
+      'Microsoft Aria Online (Natural)', 'Microsoft Jenny Online (Natural)',
+      'Microsoft Guy Online (Natural)', 'Microsoft Sonia Online (Natural)',
+      // Windows standard
+      'Microsoft Zira', 'Microsoft David', 'Microsoft Mark',
+      // Fallback
+      'Alex', 'Victoria', 'Fiona'
+    ];
+
     function loadBrowserVoices() {
       if (!window.speechSynthesis) return;
       function doLoad() {
-        var voices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('en'); });
-        if (voices.length === 0) return;
-        tts.voices = voices.map(function(v) { return {name: v.name, lang: v.lang, quality: 'standard', browserVoice: v}; });
-        // Set default voice if current selection not found
+        var allVoices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('en'); });
+        if (allVoices.length === 0) return;
+
+        // Score and sort voices by quality
+        tts.voices = allVoices.map(function(v) {
+          var rank = PREFERRED_VOICES.indexOf(v.name);
+          var quality = 'standard';
+          if (v.name.indexOf('Google') >= 0) quality = 'google';
+          else if (v.name.indexOf('Premium') >= 0 || v.name.indexOf('Natural') >= 0) quality = 'premium';
+          else if (v.name.indexOf('Enhanced') >= 0) quality = 'enhanced';
+          else if (v.name.indexOf('Online') >= 0) quality = 'online';
+          // Score: preferred list rank first, then quality tier
+          var score = rank >= 0 ? rank : 100;
+          if (quality === 'google') score = Math.min(score, 5);
+          else if (quality === 'premium') score = Math.min(score, 10);
+          else if (quality === 'enhanced') score = Math.min(score, 20);
+          else if (quality === 'online') score = Math.min(score, 15);
+          return {name: v.name, lang: v.lang, quality: quality, browserVoice: v, score: score};
+        });
+
+        tts.voices.sort(function(a, b) { return a.score - b.score; });
+
+        // Auto-select best voice if current selection not found
         var found = tts.voices.find(function(v) { return v.name === tts.voice; });
-        if (!found && tts.voices.length > 0) tts.voice = tts.voices[0].name;
+        if (!found && tts.voices.length > 0) {
+          tts.voice = tts.voices[0].name;
+        }
         var sel = document.getElementById('voiceSelect');
         if (sel) populateVoiceSelect(sel);
       }
       doLoad();
-      // Some browsers load voices async
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = doLoad;
       }
@@ -5735,7 +5774,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.voices.forEach(function(v) {
         var opt = document.createElement('option');
         opt.value = v.name;
-        var badge = v.quality === 'premium' ? ' [Premium]' : v.quality === 'enhanced' ? ' [Enhanced]' : '';
+        var badge = '';
+        if (v.quality === 'google') badge = ' [Google - Best]';
+        else if (v.quality === 'premium') badge = ' [Premium]';
+        else if (v.quality === 'enhanced') badge = ' [Enhanced]';
+        else if (v.quality === 'online') badge = ' [Online]';
         opt.textContent = v.name + badge;
         if (v.name === tts.voice) opt.selected = true;
         sel.appendChild(opt);
@@ -5824,7 +5867,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           document.querySelectorAll('.voice-test-btn.stop').forEach(function(b) { b.style.display = 'none'; });
         });
       } else {
-        // Browser speech synthesis fallback
+        // Browser speech synthesis fallback with sentence chunking
         if (!window.speechSynthesis) {
           tts.speakingIdx = -1;
           updateTTSButtons();
@@ -5833,21 +5876,41 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }
         window.speechSynthesis.cancel();
         if (statusEl) statusEl.innerHTML = '';
-        var utter = new SpeechSynthesisUtterance(text);
+
+        // Split into sentence chunks (Chrome cuts off after ~200 chars)
+        var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+        var chunks = [];
+        var current = '';
+        for (var ci = 0; ci < sentences.length; ci++) {
+          if ((current + sentences[ci]).length > 180 && current) {
+            chunks.push(current.trim());
+            current = '';
+          }
+          current += sentences[ci];
+        }
+        if (current.trim()) chunks.push(current.trim());
+
+        var chunkIdx = 0;
         var selectedVoice = tts.voices.find(function(v) { return v.name === tts.voice; });
-        if (selectedVoice && selectedVoice.browserVoice) utter.voice = selectedVoice.browserVoice;
-        utter.rate = tts.rate / 175; // convert WPM to rate multiplier
-        utter.onend = function() {
-          tts.speakingIdx = -1;
-          updateTTSButtons();
-          document.querySelectorAll('.voice-test-btn.stop').forEach(function(b) { b.style.display = 'none'; });
-        };
-        utter.onerror = function() {
-          tts.speakingIdx = -1;
-          updateTTSButtons();
-          document.querySelectorAll('.voice-test-btn.stop').forEach(function(b) { b.style.display = 'none'; });
-        };
-        window.speechSynthesis.speak(utter);
+        var speechRate = tts.rate / 175; // convert WPM to rate multiplier
+        var pitch = parseFloat(localStorage.getItem('tts-pitch') || '1');
+
+        function speakNextChunk() {
+          if (chunkIdx >= chunks.length || tts.speakingIdx === -1) {
+            tts.speakingIdx = -1;
+            updateTTSButtons();
+            document.querySelectorAll('.voice-test-btn.stop').forEach(function(b) { b.style.display = 'none'; });
+            return;
+          }
+          var utter = new SpeechSynthesisUtterance(chunks[chunkIdx]);
+          if (selectedVoice && selectedVoice.browserVoice) utter.voice = selectedVoice.browserVoice;
+          utter.rate = speechRate;
+          utter.pitch = pitch;
+          utter.onend = function() { chunkIdx++; speakNextChunk(); };
+          utter.onerror = function() { chunkIdx++; speakNextChunk(); };
+          window.speechSynthesis.speak(utter);
+        }
+        speakNextChunk();
       }
     }
 

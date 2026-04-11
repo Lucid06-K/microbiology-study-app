@@ -5784,6 +5784,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       wordElements: [],
       currentWordIdx: 0,
       totalWords: 0,
+      wordTimer: null,
     };
 
     // Novelty voices to hide from the list
@@ -6102,6 +6103,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     function stopTTS() {
       if (tts.currentAudio) { tts.currentAudio.pause(); tts.currentAudio.onended = null; tts.currentAudio = null; }
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (tts.wordTimer) { clearInterval(tts.wordTimer); tts.wordTimer = null; }
 
       // Clean up highlighting and playback bar
       finishTTSPlayback();
@@ -6252,9 +6254,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       tts.totalWords = text.split(/\s+/).length;
       tts.currentWordIdx = 0;
       var chunkIdx = 0;
+      var boundaryFired = false;
+
+      // Estimate ms per word based on speaking rate
+      var msPerWord = Math.round(60000 / (tts.rate || 175));
 
       function speakChunk() {
         if (chunkIdx >= chunks.length || tts.speakingIdx !== cardIdx) {
+          if (tts.wordTimer) clearInterval(tts.wordTimer);
           finishTTSPlayback();
           return;
         }
@@ -6269,11 +6276,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         utter.pitch = pitch;
 
         var baseOffset = chunkWordOffsets[chunkIdx] || 0;
+        var chunkWords = chunks[chunkIdx].split(/\s+/).length;
 
         // Word boundary event for highlighting
         utter.onboundary = function(event) {
           if (event.name === 'word') {
-            // Calculate which word we're on based on character index within chunk
+            boundaryFired = true;
+            if (tts.wordTimer) { clearInterval(tts.wordTimer); tts.wordTimer = null; }
             var spokenSoFar = chunks[chunkIdx].substring(0, event.charIndex);
             var wordsSpoken = spokenSoFar.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
             var globalIdx = baseOffset + wordsSpoken;
@@ -6284,13 +6293,48 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           }
         };
 
-        utter.onend = function() { chunkIdx++; speakChunk(); };
+        // Start timer-based fallback for highlighting (in case onboundary doesn't fire)
+        if (!boundaryFired) {
+          startWordTimer(baseOffset, chunkWords, msPerWord);
+        }
+
+        utter.onend = function() {
+          if (tts.wordTimer && !boundaryFired) clearInterval(tts.wordTimer);
+          chunkIdx++;
+          if (chunkIdx < chunks.length && !boundaryFired) {
+            startWordTimer(chunkWordOffsets[chunkIdx] || 0, chunks[chunkIdx].split(/\s+/).length, msPerWord);
+          }
+          speakChunk();
+        };
         utter.onerror = function() { chunkIdx++; speakChunk(); };
 
         window.speechSynthesis.speak(utter);
       }
 
       speakChunk();
+    }
+
+    // Timer-based word highlighting fallback (for when onboundary doesn't fire)
+    function startWordTimer(startWordIdx, wordCount, msPerWord) {
+      if (tts.wordTimer) clearInterval(tts.wordTimer);
+      var localIdx = 0;
+      highlightWord(startWordIdx);
+      tts.currentWordIdx = startWordIdx;
+      updatePlaybackProgress();
+
+      tts.wordTimer = setInterval(function() {
+        if (tts.paused || tts.speakingIdx === -1) return;
+        localIdx++;
+        if (localIdx >= wordCount) {
+          clearInterval(tts.wordTimer);
+          tts.wordTimer = null;
+          return;
+        }
+        var globalIdx = startWordIdx + localIdx;
+        highlightWord(globalIdx);
+        tts.currentWordIdx = globalIdx;
+        updatePlaybackProgress();
+      }, msPerWord);
     }
 
     function highlightWord(idx) {
@@ -6306,19 +6350,20 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function jumpToWord(cardIdx, wordIdx) {
-      if (tts.speakingIdx !== cardIdx) return;
-      stopTTS();
+      if (tts.speakingIdx !== cardIdx || !tts.words || tts.words.length === 0) return;
+
+      // Stop speech WITHOUT cleaning up the UI
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (tts.wordTimer) clearInterval(tts.wordTimer);
 
       // Rebuild text from wordIdx onwards
       var remainingWords = tts.words.slice(wordIdx);
       var text = remainingWords.join(' ');
 
       tts.currentWordIdx = wordIdx;
-      tts.speakingIdx = cardIdx;
-      tts.paused = false;
-      updateTTSButtons();
+      highlightWord(wordIdx);
+      updatePlaybackProgress();
 
-      // Recalculate for the remaining text
       if (!window.speechSynthesis) return;
 
       var selectedVoice = tts.voices.find(function(v) { return v.name === tts.voice; });
@@ -6326,6 +6371,9 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var speechRate = tts.rate / 175;
       if (speechRate < 0.1 || speechRate > 3) speechRate = 1;
       var pitch = parseFloat(localStorage.getItem('tts-pitch') || '1');
+
+      // Estimate ms per word for the timer fallback
+      var msPerWord = Math.round(60000 / (tts.rate || 175));
 
       var sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
       var chunks = [];
@@ -6348,6 +6396,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       }
 
       var chunkIdx = 0;
+      var boundaryFired = false;
 
       function speakChunk() {
         if (chunkIdx >= chunks.length || tts.speakingIdx !== cardIdx) {
@@ -6363,8 +6412,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         utter.rate = speechRate;
         utter.pitch = pitch;
         var baseOffset = chunkWordOffsets[chunkIdx] || wordIdx;
+        var chunkWords = chunks[chunkIdx].split(/\s+/).length;
+
         utter.onboundary = function(event) {
           if (event.name === 'word') {
+            boundaryFired = true;
             var spokenSoFar = chunks[chunkIdx].substring(0, event.charIndex);
             var wordsSpoken = spokenSoFar.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
             var globalIdx = baseOffset + wordsSpoken;
@@ -6373,7 +6425,20 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
             updatePlaybackProgress();
           }
         };
-        utter.onend = function() { chunkIdx++; speakChunk(); };
+
+        // Timer-based fallback if onboundary doesn't fire
+        if (!boundaryFired && chunkIdx === 0) {
+          startWordTimer(baseOffset, chunkWords, msPerWord);
+        }
+
+        utter.onend = function() {
+          if (tts.wordTimer && !boundaryFired) clearInterval(tts.wordTimer);
+          chunkIdx++;
+          if (chunkIdx < chunks.length && !boundaryFired) {
+            startWordTimer(chunkWordOffsets[chunkIdx] || 0, chunks[chunkIdx].split(/\s+/).length, msPerWord);
+          }
+          speakChunk();
+        };
         utter.onerror = function() { chunkIdx++; speakChunk(); };
         window.speechSynthesis.speak(utter);
       }

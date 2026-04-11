@@ -320,36 +320,59 @@
       margin: 0 auto;
       padding: 32px 28px 60px;
     }
-
-    /* ===== DASHBOARD ===== */
-    .dashboard-header {
-      margin-bottom: 32px;
+    .content-area.dashboard-active {
+      max-width: 100%;
+      padding: 14px 18px 14px;
     }
-    .dashboard-header h2 {
-      font-size: 1.8rem;
+
+    /* ===== DASHBOARD GRID LAYOUT ===== */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      height: calc(100vh - var(--topbar-height) - 40px);
+      overflow: hidden;
+    }
+    .dashboard-top-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .dashboard-layout .dash-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      min-height: 0;
+      overflow: auto;
+    }
+    .dashboard-layout .dash-card h3 {
+      font-size: 0.82rem;
       font-weight: 700;
+      color: var(--text);
       margin-bottom: 6px;
-    }
-    .dashboard-header p {
-      color: var(--text-light);
-      font-size: 1rem;
-    }
-
-    .dashboard-overview {
       display: flex;
       align-items: center;
-      gap: 32px;
-      margin-bottom: 40px;
-      padding: 28px;
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-    }
-    .progress-ring-container {
-      position: relative;
+      gap: 6px;
+      white-space: nowrap;
       flex-shrink: 0;
     }
-    .progress-ring-container svg { transform: rotate(-90deg); }
+
+    /* Top row cards */
+    .dash-progress {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .dash-progress .progress-ring-container {
+      position: relative;
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+    }
+    .dash-progress .progress-ring-container svg { transform: rotate(-90deg); }
     .progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
     .progress-ring-fill {
       fill: none;
@@ -363,88 +386,311 @@
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      line-height: 1;
     }
     .progress-ring-text .pct {
-      font-size: 1.6rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--primary);
       display: block;
+      line-height: 1;
+      margin-bottom: 2px;
     }
     .progress-ring-text .label {
-      font-size: 0.7rem;
+      font-size: 0.5rem;
       color: var(--text-light);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      line-height: 1;
     }
-    .overview-stats { flex: 1; }
-    .overview-stats h3 { font-size: 1.1rem; margin-bottom: 12px; }
-    .stat-row {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
+    .dash-progress .dash-stats-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
     }
-    .stat-item {
+    .dash-progress .dash-stats-grid .stat-item {
       text-align: center;
-      min-width: 80px;
     }
-    .stat-item .num {
-      font-size: 1.5rem;
+    .dash-progress .dash-stats-grid .stat-item .num {
+      font-size: 1rem;
       font-weight: 700;
       color: var(--primary);
+      display: block;
+      line-height: 1.2;
     }
-    .stat-item .desc {
-      font-size: 0.75rem;
+    .dash-progress .dash-stats-grid .stat-item .desc {
+      font-size: 0.6rem;
       color: var(--text-light);
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
+    .dash-progress .dash-title {
+      font-size: 0.7rem;
+      color: var(--text-light);
+      margin-bottom: 2px;
+      font-weight: 600;
+    }
 
-    .week-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
+    .dash-exam {
+      grid-column: 2;
+      grid-row: 1;
     }
-    .week-card {
-      background: var(--card);
+    .dash-exam .exam-quick-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .dash-exam .exam-quick-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 80px;
+    }
+    .dash-exam .exam-quick-field label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+    .dash-exam .exam-quick-field select {
+      padding: 6px 8px;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      outline: none;
     }
-    .week-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    .dash-exam .dash-exam-btn {
+      padding: 7px 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .dash-exam .dash-exam-btn:hover { opacity: 0.9; }
+    .dash-exam .exam-customize-toggle {
+      font-size: 0.75rem;
+      color: var(--primary);
+      cursor: pointer;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .dash-exam .exam-customize-toggle:hover { text-decoration: underline; }
+    .dash-exam .exam-lecture-checks {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 6px;
+      max-height: 150px;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      padding: 4px 0;
+      background: var(--bg);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      scrollbar-width: thin;
+    }
+    .dash-exam .exam-lecture-checks::-webkit-scrollbar { width: 6px; }
+    .dash-exam .exam-lecture-checks::-webkit-scrollbar-track { background: transparent; }
+    .dash-exam .exam-lecture-checks::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .dash-exam .exam-lecture-checks::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    .dash-exam .exam-lecture-checks.hidden { display: none; }
+    .dash-exam .exam-lecture-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1.3;
+      transition: background 0.15s;
+    }
+    .dash-exam .exam-lecture-check:hover { background: var(--primary-light); }
+    .dash-exam .exam-lecture-check input { width: 14px; height: 14px; flex-shrink: 0; accent-color: var(--primary); }
+
+    .dash-flashcards {
+      grid-column: 3;
+      grid-row: 1;
+    }
+    .dash-flashcards .fc-quick-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .dash-flashcards .fc-quick-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 70px;
+    }
+    .dash-flashcards .fc-quick-field label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+    .dash-flashcards .fc-quick-field select {
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-family: var(--font);
+      outline: none;
+    }
+    .dash-flashcards .dash-fc-btn {
+      padding: 7px 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .dash-flashcards .dash-fc-btn:hover { opacity: 0.9; }
+
+    /* Bottom row */
+    .dash-weeks {
+      grid-column: 1;
+      grid-row: 2;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .dash-weeks .week-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .dash-weeks .week-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .dash-weeks .week-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
       border-color: var(--primary);
     }
-    .week-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 10px;
+    .dash-weeks .week-card h4 {
+      font-size: 0.78rem;
+      margin-bottom: 4px;
       color: var(--text);
+      line-height: 1.3;
     }
-    .week-card-meta {
-      font-size: 0.8rem;
-      color: var(--text-light);
-      margin-bottom: 14px;
-    }
-    .week-card-progress {
-      height: 6px;
+    .dash-weeks .week-card-progress {
+      height: 4px;
       background: var(--border);
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 3px;
     }
-    .week-card-progress-fill {
+    .dash-weeks .week-card-progress-fill {
       height: 100%;
       background: var(--primary);
-      border-radius: 3px;
+      border-radius: 2px;
       transition: width 0.5s;
     }
-    .week-card-score {
-      font-size: 0.8rem;
+    .dash-weeks .week-card-score {
+      font-size: 0.68rem;
       color: var(--text-light);
     }
-    .week-card-score strong { color: var(--primary); }
+    .dash-weeks .week-card-score strong { color: var(--primary); }
+
+    .dash-weakareas {
+      grid-column: 2;
+      grid-row: 2;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: thin;
+    }
+    .dash-weakareas::-webkit-scrollbar { width: 6px; }
+    .dash-weakareas::-webkit-scrollbar-track { background: transparent; }
+    .dash-weakareas::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .dash-weakareas::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    .dash-weakareas .weak-area-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .dash-weakareas .weak-area-item:last-child { border-bottom: none; }
+    .dash-weakareas .weak-area-info { flex: 1; min-width: 0; }
+    .dash-weakareas .weak-area-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .dash-weakareas .weak-area-meta { font-size: 0.7rem; color: var(--text-light); margin-top: 1px; }
+    .dash-weakareas .weak-area-bar { width: 60px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+    .dash-weakareas .weak-area-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+    .dash-weakareas .weak-area-btn {
+      padding: 4px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      background: var(--primary);
+      color: #fff;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .dash-weakareas .weak-area-btn:hover { opacity: 0.9; }
+    .dash-weakareas .not-attempted-label { font-size: 0.78rem; font-weight: 600; color: var(--text-light); margin: 6px 0 4px; }
+    .dash-weakareas .dash-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: var(--text-light);
+      padding: 20px;
+    }
+    .dash-weakareas .dash-empty-state .empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
+    .dash-weakareas .dash-empty-state p { font-size: 0.82rem; line-height: 1.5; }
+    .dash-weakareas .dash-empty-state .tip { margin-top: 10px; font-size: 0.75rem; color: var(--primary); }
+
+    /* Fallback for smaller screens */
+    @media (max-width: 1200px) {
+      .dashboard-layout {
+        height: auto;
+        overflow: visible;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+      }
+      .dash-progress { grid-column: 1 / 3; grid-row: 1; }
+      .dash-exam { grid-column: 1; grid-row: 2; }
+      .dash-flashcards { grid-column: 2; grid-row: 2; }
+      .dash-weeks { grid-column: 1; grid-row: 3; }
+      .dash-weakareas { grid-column: 2; grid-row: 3; min-height: 200px; }
+    }
 
     /* ===== LECTURE VIEW ===== */
     .lecture-header {
@@ -957,6 +1203,125 @@
     }
     .sidebar-overlay.visible { opacity: 1; }
 
+    /* ===== KEYBOARD SHORTCUTS OVERLAY ===== */
+    .shortcuts-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; display:flex; align-items:center; justify-content:center; }
+    .shortcuts-card { background:var(--card); border-radius:14px; padding:28px; max-width:480px; width:90%; max-height:80vh; overflow-y:auto; }
+    .shortcuts-card h3 { font-size:1.15rem; margin-bottom:16px; color:var(--text); }
+    .shortcut-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+    .shortcut-key { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:2px 10px; font-family:monospace; font-weight:600; font-size:0.85rem; }
+
+    /* ===== SHORT ANSWER QUESTIONS ===== */
+    .sa-section { margin-top:32px; padding-top:24px; border-top:2px solid var(--border); }
+    .sa-heading { font-size:1.15rem; margin-bottom:16px; color:var(--text); }
+    .sa-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
+    .sa-marks { float:right; background:var(--primary-light); color:var(--primary); font-size:0.8rem; font-weight:700; padding:4px 10px; border-radius:6px; }
+    .sa-question { font-size:0.95rem; font-weight:600; margin-bottom:12px; line-height:1.5; }
+    .sa-textarea { width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-family:var(--font); font-size:0.9rem; resize:vertical; outline:none; box-sizing:border-box; }
+    .sa-textarea:focus { border-color:var(--primary); }
+    .sa-reveal-btn { margin-top:10px; padding:8px 18px; border:2px solid var(--primary); background:none; color:var(--primary); border-radius:8px; font-weight:600; cursor:pointer; font-family:var(--font); font-size:0.85rem; transition:all 0.2s; }
+    .sa-reveal-btn:hover { background:var(--primary); color:#fff; }
+    .sa-model { margin-top:14px; padding:16px; background:rgba(42,157,143,0.06); border-radius:10px; border-left:4px solid var(--primary); font-size:0.9rem; line-height:1.6; }
+    .sa-rating { margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .sa-rating span { font-size:0.85rem; font-weight:600; color:var(--text-light); }
+    .sa-rate-btn { padding:6px 14px; border:1px solid var(--border); border-radius:8px; background:var(--card); cursor:pointer; font-size:0.82rem; font-weight:600; font-family:var(--font); transition:all 0.2s; }
+    .sa-rate-btn.active.green { background:var(--success); color:#fff; border-color:var(--success); }
+    .sa-rate-btn.active.yellow { background:var(--warning); color:#fff; border-color:var(--warning); }
+    .sa-rate-btn.active.red { background:var(--error); color:#fff; border-color:var(--error); }
+
+    /* ===== WEAK AREAS WIDGET ===== */
+    .weak-areas-widget { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:28px; }
+    .weak-areas-widget h3 { font-size:1.15rem; margin-bottom:16px; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .weak-area-item { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .weak-area-item:last-child { border-bottom:none; }
+    .weak-area-info { flex:1; min-width:0; }
+    .weak-area-title { font-size:0.9rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .weak-area-meta { font-size:0.78rem; color:var(--text-light); margin-top:2px; }
+    .weak-area-bar { width:80px; height:8px; background:var(--border); border-radius:4px; overflow:hidden; flex-shrink:0; }
+    .weak-area-bar-fill { height:100%; border-radius:4px; transition:width 0.4s; }
+    .weak-area-btn { padding:6px 14px; border:none; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; font-family:var(--font); background:var(--primary); color:#fff; white-space:nowrap; transition:opacity 0.2s; }
+    .weak-area-btn:hover { opacity:0.9; }
+    .not-attempted-list { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+    .not-attempted-label { font-size:0.85rem; font-weight:600; color:var(--text-light); margin-bottom:8px; }
+
+    /* ===== PRACTICE EXAM MODE ===== */
+    .exam-config-panel { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:28px; }
+    .exam-config-panel h3 { font-size:1.15rem; margin-bottom:16px; color:var(--text); }
+    .exam-config-row { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; }
+    .exam-config-field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+    .exam-config-field label { font-size:0.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.04em; }
+    .exam-config-field select { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-size:0.9rem; font-family:var(--font); outline:none; }
+    /* exam-lecture-checks and exam-lecture-check styles are in .dash-exam section above */
+    .exam-lecture-check:hover { border-color:var(--primary); }
+    .exam-lecture-check input { accent-color:var(--primary); }
+    .exam-lecture-check.checked { background:var(--primary-light); border-color:var(--primary); }
+    .exam-start-btn { padding:12px 28px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-size:0.95rem; font-weight:700; cursor:pointer; font-family:var(--font); transition:all 0.2s; }
+    .exam-start-btn:hover { opacity:0.9; transform:translateY(-1px); }
+    .exam-start-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+    .exam-container { max-width:700px; margin:0 auto; }
+    .exam-progress { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+    .exam-progress-bar { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+    .exam-progress-fill { height:100%; background:var(--primary); border-radius:4px; transition:width 0.4s; }
+    .exam-progress-text { font-size:0.85rem; font-weight:600; color:var(--text-light); white-space:nowrap; }
+    .exam-timer { font-size:0.9rem; font-weight:700; color:var(--accent); min-width:60px; text-align:right; }
+    .exam-question-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:28px; margin-bottom:20px; }
+    .exam-q-num { font-size:0.75rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+    .exam-q-text { font-size:1.1rem; font-weight:600; margin-bottom:20px; line-height:1.5; }
+    .exam-options { display:flex; flex-direction:column; gap:10px; }
+    .exam-option-btn { display:block; width:100%; text-align:left; padding:14px 18px; border:2px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:0.95rem; cursor:pointer; font-family:var(--font); transition:all 0.2s; line-height:1.5; }
+    .exam-option-btn:hover { border-color:var(--primary); background:var(--primary-light); }
+    .exam-option-btn.selected { border-color:var(--primary); background:var(--primary-light); font-weight:600; }
+    .exam-nav { display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:12px; }
+    .exam-nav-btn { padding:10px 24px; border:2px solid var(--border); border-radius:10px; background:var(--card); color:var(--text); font-size:0.9rem; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.2s; }
+    .exam-nav-btn:hover { border-color:var(--primary); background:var(--primary-light); }
+    .exam-nav-btn.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .exam-nav-btn.primary:hover { opacity:0.9; }
+    .exam-nav-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .exam-finish-btn { padding:10px 24px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:0.9rem; font-weight:700; cursor:pointer; font-family:var(--font); transition:all 0.2s; }
+    .exam-finish-btn:hover { opacity:0.9; }
+
+    .exam-results { text-align:center; }
+    .exam-results h2 { font-size:1.6rem; margin-bottom:8px; }
+    .exam-results .exam-score-ring { margin:20px auto; }
+    .exam-results-table { width:100%; border-collapse:collapse; margin:24px 0; text-align:left; font-size:0.9rem; }
+    .exam-results-table th { background:var(--primary); color:#fff; padding:10px 14px; font-size:0.85rem; }
+    .exam-results-table td { padding:10px 14px; border-bottom:1px solid var(--border); }
+    .exam-results-table tr:nth-child(even) td { background:var(--table-alt); }
+    .exam-review-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:14px; text-align:left; }
+    .exam-review-card.review-correct { border-left:4px solid var(--success); }
+    .exam-review-card.review-wrong { border-left:4px solid var(--error); }
+
+    /* ===== FLASHCARD MODE ===== */
+    .flashcard-container { perspective:1000px; max-width:500px; margin:0 auto; }
+    .flashcard { position:relative; min-height:280px; transform-style:preserve-3d; transition:transform 0.5s; cursor:pointer; }
+    .flashcard.flipped { transform:rotateY(180deg); }
+    .flashcard-front, .flashcard-back { position:absolute; inset:0; backface-visibility:hidden; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:32px; display:flex; align-items:center; justify-content:center; text-align:center; flex-direction:column; }
+    .flashcard-back { transform:rotateY(180deg); }
+    .flashcard-front .fc-label, .flashcard-back .fc-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); margin-bottom:12px; }
+    .flashcard-front .fc-term { font-size:1.3rem; font-weight:700; color:var(--primary); }
+    .flashcard-back .fc-def { font-size:1rem; line-height:1.6; color:var(--text); }
+    .flashcard-controls { display:flex; justify-content:center; gap:12px; margin-top:20px; }
+    .fc-btn { padding:10px 24px; border:none; border-radius:10px; font-size:0.9rem; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.2s; }
+    .fc-btn.known { background:var(--success); color:#fff; }
+    .fc-btn.known:hover { opacity:0.9; }
+    .fc-btn.learning { background:var(--warning); color:#fff; }
+    .fc-btn.learning:hover { opacity:0.9; }
+    .fc-btn.flip { background:var(--card); color:var(--primary); border:2px solid var(--primary); }
+    .fc-btn.flip:hover { background:var(--primary-light); }
+    .flashcard-progress { text-align:center; margin-bottom:16px; font-size:0.85rem; color:var(--text-light); font-weight:600; }
+    .flashcard-summary { text-align:center; padding:40px 20px; }
+    .flashcard-summary h3 { font-size:1.3rem; margin-bottom:12px; }
+    .flashcard-summary .fc-stats { display:flex; justify-content:center; gap:24px; margin:20px 0; }
+    .flashcard-summary .fc-stat { text-align:center; }
+    .flashcard-summary .fc-stat .num { font-size:1.5rem; font-weight:700; }
+    .flashcard-summary .fc-stat .desc { font-size:0.8rem; color:var(--text-light); }
+    .fc-dashboard-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:28px; }
+    .fc-dashboard-card h3 { font-size:1.15rem; margin-bottom:16px; color:var(--text); display:flex; align-items:center; gap:8px; }
+    .fc-config-row { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; }
+    .fc-config-field { display:flex; flex-direction:column; gap:5px; }
+    .fc-config-field label { font-size:0.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; }
+    .fc-config-field select { padding:10px 12px; border:1px solid var(--border); border-radius:10px; background:var(--bg); color:var(--text); font-size:0.9rem; font-family:var(--font); outline:none; }
+
     /* ===== MOBILE ===== */
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
@@ -966,7 +1331,17 @@
       .main { margin-left: 0; }
       .hamburger { display: flex; }
       .content-area { padding: 24px 16px 60px; }
-      .dashboard-overview { flex-direction: column; text-align: center; }
+      .dashboard-layout {
+        height: auto;
+        overflow: visible;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      .dash-progress, .dash-exam, .dash-flashcards, .dash-weeks, .dash-weakareas {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+      }
+      .dash-weakareas { min-height: 150px; }
       .tab-bar { flex-wrap: wrap; }
       .tab-btn { min-width: calc(50% - 4px); }
     }
@@ -987,6 +1362,126 @@
     }
     .video-title { font-weight: 600; font-size: 0.92rem; margin-bottom: 2px; }
     .video-channel { font-size: 0.8rem; color: var(--text-light); }
+    /* ===== POMODORO TIMER (in sidebar) ===== */
+    .pomo-container {
+      margin-top: auto;
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .pomo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .pomo-ring {
+      position: relative;
+      width: 70px; height: 70px;
+      flex-shrink: 0;
+    }
+    .pomo-ring svg { transform: rotate(-90deg); }
+    .pomo-ring-bg { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 4; }
+    .pomo-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+    .pomo-ring-fill.work { stroke: var(--accent); }
+    .pomo-ring-fill.break { stroke: #2a9d8f; }
+    .pomo-time {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font);
+      line-height: 1;
+    }
+    .pomo-label {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+    }
+    .pomo-label .pomo-phase { color: #fff; font-size: 0.8rem; display: block; }
+    .pomo-label .pomo-session { font-size: 0.65rem; }
+    .pomo-controls { display: flex; gap: 6px; }
+    .pomo-btn {
+      width: 32px; height: 32px;
+      border: none; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      font-size: 0;
+    }
+    .pomo-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .pomo-btn svg { width: 14px; height: 14px; pointer-events: none; }
+    .pomo-settings-btn {
+      background: none; border: none; color: rgba(255,255,255,0.4);
+      cursor: pointer; font-size: 0.65rem; margin-top: 2px; transition: color 0.15s;
+    }
+    .pomo-settings-btn:hover { color: #fff; }
+    .pomo-settings {
+      width: 100%; display: none; flex-direction: column; gap: 6px;
+      padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px;
+    }
+    .pomo-settings.open { display: flex; }
+    .pomo-setting-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.7rem; color: rgba(255,255,255,0.7);
+    }
+    .pomo-setting-row input {
+      width: 50px; padding: 3px 6px; border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff;
+      font-size: 0.72rem; text-align: center; font-family: var(--font); outline: none;
+    }
+    .pomo-setting-row input:focus { border-color: var(--primary); }
+    .pomo-save-btn {
+      padding: 5px 12px; border: none; border-radius: 6px;
+      background: var(--primary); color: #fff; font-size: 0.7rem; font-weight: 600;
+      cursor: pointer; font-family: var(--font); transition: opacity 0.15s; align-self: center;
+    }
+    .pomo-save-btn:hover { opacity: 0.9; }
+
+    /* Break overlay - blocks entire screen */
+    .pomo-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px;
+    }
+    .pomo-overlay.work-done {
+      background: rgba(42, 157, 143, 0.95);
+    }
+    .pomo-overlay.break-done {
+      background: rgba(231, 111, 81, 0.95);
+    }
+    .pomo-overlay-ring {
+      position: relative; width: 160px; height: 160px;
+    }
+    .pomo-overlay-ring svg { transform: rotate(-90deg); }
+    .pomo-overlay-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.2); stroke-width: 6; }
+    .pomo-overlay-ring .ring-fill { fill: none; stroke: #fff; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+    .pomo-overlay-time {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 2.5rem; font-weight: 700; color: #fff; font-family: var(--font);
+    }
+    .pomo-overlay-title {
+      font-size: 1.8rem; font-weight: 700; color: #fff; text-align: center;
+    }
+    .pomo-overlay-msg {
+      font-size: 1rem; color: rgba(255,255,255,0.85); text-align: center; max-width: 400px; line-height: 1.5;
+    }
+    .pomo-overlay-dismiss {
+      padding: 12px 32px; border: 2px solid #fff; border-radius: 10px;
+      background: none; color: #fff; font-size: 1rem; font-weight: 600;
+      cursor: pointer; font-family: var(--font); transition: all 0.2s;
+      display: none;
+    }
+    .pomo-overlay-dismiss.show { display: inline-block; }
+    .pomo-overlay-dismiss:hover { background: rgba(255,255,255,0.15); }
+    .pomo-overlay-countdown {
+      font-size: 0.85rem; color: rgba(255,255,255,0.6);
+    }
   </style>
 </head>
 <body>
@@ -1001,6 +1496,7 @@
       Dashboard
     </button>
     <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="pomo-container"><div id="pomoWidget" class="pomo"></div></div>
   </aside>
 
   <!-- Mobile overlay -->
@@ -1166,6 +1662,103 @@
       if (!lecImages) return [];
       return lecImages[topicTitle] || [];
     }
+
+    // ==========================================
+    // SHORT ANSWER QUESTIONS DATA
+    // ==========================================
+    var SHORT_ANSWERS = {
+  1: [
+    {q:"Explain how the eukaryotic cell originated from bacterial symbiosis. In your answer, identify the three bacterial groups involved and describe the specific organelle each gave rise to.",model:"The eukaryotic cell originated from a symbiotic association of three distinct bacterial groups. The archaea formed the nucleus of the eukaryotic cell, where DNA replication and RNA synthesis occur. The proteobacteria became the mitochondria, which generate energy (ATP) for the cell through aerobic respiration. The cyanobacteria gave rise to the chloroplast in plant cells, which produces glucose from sunlight and carbon dioxide via photosynthesis. This endosymbiotic event is considered the origin of all eukaryotic life on Earth, and the process of symbiosis between bacteria and other organisms continues to this day, as seen in examples such as lichens (fungi + cyanobacteria/algae) and bacteriocytes in mealybugs.",marks:10},
+    {q:"A sheep farmer notices that some of the subclover in their pasture has nodules on the roots. Explain the significance of these nodules for agricultural production, linking your answer to the role of symbiotic microorganisms.",model:"The nodules on the roots of the subclover contain symbiotic bacteria called rhizobia. These rhizobia fix atmospheric nitrogen, converting it into a biologically available form (ammonia/ammonium) that the legume can use for growth. This nitrogen fixation is critical for agricultural production because it provides a natural source of nitrogen to the soil, reducing the need for synthetic nitrogen fertilisers. Other plants growing nearby or planted subsequently can also benefit from the increased nitrogen availability in the soil. Since soil health is integral to both plant and animal health in agriculture (most Australian food-producing animals are grazed), rhizobial symbiosis underpins the productivity of grazing systems.",marks:10},
+    {q:"Compare and contrast the four metabolic classes of bacteria (photoautotrophs, chemoautotrophs, photoheterotrophs, and chemoheterotrophs). Explain why nearly all pathogenic bacteria belong to the chemoheterotroph class.",model:"Photoautotrophs use sunlight for energy and CO2 as their carbon source, requiring no complex organic molecules. Chemoautotrophs use chemical energy but can still make organic compounds from CO2. Photoheterotrophs use sunlight for energy but require more complex carbon-containing molecules for biosynthesis. Chemoheterotrophs rely on complex organic compounds for both energy and biosynthesis. Nearly all pathogenic bacteria are chemoheterotrophs because they are parasites of their hosts. By living in or on a host organism, they have a ready supply of complex organic molecules provided by the host, which serve as both an energy source and building blocks for their cellular structures and metabolism. They have therefore evolved to depend on host-derived nutrients rather than producing their own from simple compounds.",marks:10},
+    {q:"Describe two ways in which microorganisms can have both beneficial and adverse effects on agricultural plants, providing a specific named example for each.",model:"Beneficial example: Phytoplasma infection of poinsettia plants produces pathological effects (stunting, witches' broom branching, and phyllody creating large red leaves) that are commercially desirable, making the plant attractive for sale. This illustrates how a pathogenic microorganism can be exploited commercially. Adverse example: Flavescence doree phytoplasma is transmitted by phloem-sucking insects into grapevines, where it grows in the phloem, disrupts nutrient transport, causes yellowing of leaves and abnormal fruit development, and is spreading through European vineyards with no known cure other than removing and replacing the vines. Another valid adverse example is tulip breaking virus, which creates attractive variegation but ultimately kills the tulip after a few generations.",marks:10},
+    {q:"Explain the key structural and functional differences between bacterial cells (prokaryotes) and viruses that are important for understanding how each replicates.",model:"Bacteria are cellular organisms that replicate by binary fission: a single mother cell grows, replicates its circular DNA chromosome, and divides into two equal daughter cells. Bacteria generate their own energy through metabolic processes and their genome is always DNA. Viruses are not cells but inert virions outside a host cell; they cannot generate their own energy and rely entirely on the host cell's machinery. Viral genomes can be either RNA or DNA and may be segmented. Viruses replicate by assembling component parts inside an infected host cell: the nucleic acid is replicated separately from the proteins, then these components are assembled together and often released in a mass burst of hundreds of virions from a single infected cell. These differences explain why antibiotics (which target bacterial structures like ribosomes or cell walls) do not work against viruses.",marks:10}
+  ],
+  2: [
+    {q:"A veterinarian suspects a bacterial infection in a cow's respiratory tract. Describe the process of performing a Gram stain on a sample, and explain how the results could help narrow the identification of the causative organism.",model:"First, the sample is fixed onto a glass slide by drying it carefully to prevent the bacteria from washing off during staining. Then crystal violet (purple dye) is applied, staining all bacteria purple. Next, iodine is added, which forms a large complex with crystal violet that is difficult to remove. The critical decolourisation step follows, where a decolouriser is applied for approximately 2 seconds: this washes the crystal violet-iodine complex out of gram-negative bacteria (which have a thin peptidoglycan layer) but not out of gram-positive bacteria (which have a thick peptidoglycan layer that traps the complex). Finally, a pink counterstain (safranin) is applied, which colours the now-colourless gram-negative bacteria pink while having no visible effect on the still-purple gram-positive bacteria. The results narrow identification by revealing cell morphology (cocci, bacilli, spirals), arrangement (chains, clusters), and Gram reaction. For example, gram-positive cocci in chains suggest Streptococcus, while gram-negative rods could indicate an enterobacterial species.",marks:10},
+    {q:"Explain why pasteurisation is an effective public health measure for milk safety, but is not considered a sterilisation method. What method would be needed to achieve true sterilisation and why?",model:"Pasteurisation involves heating milk to approximately 72 degrees Celsius for a short period of time. This is sufficient to kill most replicating bacteria, including the major pathogens that can infect humans through milk, making it an effective public health measure that greatly reduces food safety risks and increases shelf life. However, it is not considered sterilisation because some thermotolerant bacteria can survive the pasteurisation temperature, and critically, bacterial spores (such as those produced by Bacillus and Clostridium species) can withstand boiling temperatures for extended periods. To achieve true sterilisation (removal of all viable organisms), steam sterilisation in an autoclave is required, which heats materials to 121 degrees Celsius under pressure for approximately 15 minutes. The combination of elevated temperature and pressure ensures destruction of even the most resistant bacterial spores.",marks:10},
+    {q:"Compare and contrast two different methods of detecting microorganisms: direct microscopy and culture. Discuss the advantages and limitations of each in the context of diagnosing animal disease.",model:"Direct microscopy involves preparing a sample on a slide and examining it under a light or electron microscope. Its main advantage is speed: it provides an immediate result and directly demonstrates organisms in a sample from the animal, confirming their presence at the site of infection. However, its sensitivity is low because it is difficult to identify a single bacterial cell; a reasonable number must be present to be confident in identification. Additionally, many bacteria are too small to see without oil immersion and staining. Culture involves growing organisms from a sample on selective media (agar plates or broths) under specific temperature and atmospheric conditions. Its main advantage is high sensitivity: even a very small number of bacteria in a sample can be detected because they multiply to form visible colonies. Colony morphology (size, shape, colour, haemolysis) can also assist identification. However, culture is slower (taking hours to days), requires knowledge of the target organism to select appropriate media and conditions, and some organisms (such as obligate intracellular bacteria and viruses) cannot be grown on standard agar and require cell cultures or animals.",marks:10},
+    {q:"Explain why the removal of organic material (e.g., faeces, blood) from a surface before applying a disinfectant is an important step in disinfection protocols on a farm.",model:"Most disinfectants work more effectively when organic material is absent. Organic matter such as faeces, blood, and pus can physically shield microorganisms from contact with the disinfectant, preventing it from reaching and inactivating them. Additionally, many disinfectants react chemically with organic material, which neutralises or reduces their antimicrobial activity before they can act on the target microorganisms. Therefore, pre-cleaning with soap and water to scrub and remove organic matter reduces the overall microbial load and removes the protective organic layer, allowing the disinfectant to work at maximum efficacy against the remaining pathogens. This is particularly important in agricultural settings like milking sheds, kennels, and stables where heavy organic contamination is common.",marks:10},
+    {q:"A farmer's dairy shed uses a disinfectant that is bacteriostatic rather than bactericidal. Explain the difference between these two terms and why a bacteriostatic agent would be inappropriate for disinfecting the dairy environment.",model:"A bacteriostatic agent inhibits bacterial growth and reproduction but does not kill the bacteria. A bactericidal agent kills bacteria outright. In a dairy environment, a bacteriostatic agent is inappropriate because once the chemical is removed (e.g., washed away or degrades over time), the bacteria that were merely inhibited will resume growing and multiplying. This means the surface would quickly become recontaminated. Bacteriostatic agents are useful in treating animal infections because the animal's immune system can eliminate the growth-arrested bacteria. However, environmental surfaces lack an immune system, so a bactericidal disinfectant is essential to ensure that pathogens are permanently eliminated from the milking shed, preventing contamination of milk and transmission of infection between animals.",marks:10}
+  ],
+  3: [
+    {q:"A laboratory isolate from a diseased cow is identified as gram-positive cocci arranged in clusters that produce golden-coloured colonies with haemolysis on blood agar. Using your knowledge of bacterial classification, identify the most likely organism and explain how each observation supports your identification.",model:"The most likely organism is Staphylococcus aureus. The gram-positive result means the bacterium has a thick peptidoglycan layer that retains the crystal violet-iodine complex during decolourisation, staining purple. The coccal (round) shape and cluster arrangement are characteristic of staphylococci (the name 'Staphylococcus' derives from the Greek 'staphyl' meaning grape cluster). The golden colour of the colonies corresponds to 'aureus,' which is Latin for golden. Haemolysis on blood agar indicates the bacterium produces haemolysins that lyse red blood cells, which is a known characteristic of S. aureus. This combination of phenotypic features (Gram reaction, morphology, arrangement, colony colour, and haemolysis) allows a presumptive identification even before genetic confirmation.",marks:10},
+    {q:"Explain why 16S ribosomal RNA gene sequencing became the standard method for establishing phylogenetic relationships between bacteria, and discuss one limitation of relying solely on this gene.",model:"Prior classification systems relied on comparing phenotypic features such as spore production, flagella type, or biochemical reactions. However, these features are not universal to all bacteria (not all produce spores or have flagella), making them non-comparable across species. The 16S ribosomal RNA gene was adopted because it is present in all self-replicating organisms, providing a universal basis for comparison. Additionally, 16S rRNA sequences change very slowly over evolutionary time, making them suitable for building phylogenetic trees that reflect deep evolutionary relationships. However, a key limitation is that the 16S gene represents only approximately 0.05% of an average bacterial genome, so it provides limited resolution for distinguishing between very closely related species or strains. For example, E. coli and Shigella species are difficult to separate using 16S alone, and comparing multiple genes (e.g., via MLST or whole genome sequencing) provides much greater resolution.",marks:10},
+    {q:"Describe the structural and functional differences between a bacterial capsule and a slime layer. Explain why these structures are important for bacterial virulence.",model:"Both capsules and slime layers are composed of polysaccharides (glycocalyx) that project from the bacterial cell surface. The key structural difference is that a capsule is tightly attached to the bacterial cell and cannot be easily washed off, whereas a slime layer is loosely associated and more diffuse, meaning it can be readily washed away. Functionally, both structures contribute to virulence in two important ways: first, they protect bacteria from the host immune system by preventing phagocytosis (immune cells have difficulty engulfing encapsulated bacteria); second, they help bacteria adhere to surfaces and to each other, facilitating biofilm formation. These adhesive properties are important for establishing and maintaining infections. The capsule tends to be more effective as a virulence factor because its tight attachment means it consistently protects the bacterium during host-pathogen interactions.",marks:10},
+    {q:"A microbiologist isolates two bacterial strains that are both identified as E. coli by 16S rRNA sequencing. However, one causes urinary tract infections in humans while the other is a harmless gut commensal. Explain how this is possible, referencing the concepts of species and strain.",model:"A species is a group of organisms that are very similar phenotypically and genetically, sharing core genomic features such as the 16S rRNA gene sequence. A strain is a subgroup within a species that has additional distinguishing characteristics. Both isolates are classified as E. coli because they share the same core genome, Gram stain reaction (gram-negative), morphology (rod-shaped), and basic biochemical profile. However, they differ at the strain level because the pathogenic isolate carries additional virulence factors (such as specific fimbrial adhesins that allow it to attach to urinary tract epithelial cells) that the commensal strain lacks. These extra genes are typically acquired through horizontal gene transfer via plasmids, bacteriophages, or pathogenicity islands rather than being part of the core E. coli genome. This is why whole genome sequencing or virulence gene profiling is needed to distinguish pathogenic from non-pathogenic strains.",marks:10},
+    {q:"Draw and label a diagram comparing the cell wall structure of a gram-positive bacterium and a gram-negative bacterium. Explain how the structural difference accounts for the different Gram stain outcomes.",model:"The diagram should show two bacterial cells side by side. The gram-positive cell should be labelled with: a cell membrane (inner), and a very thick peptidoglycan layer on the outside. The gram-negative cell should be labelled with: a cell membrane (inner), a thin peptidoglycan layer, and an outer membrane containing lipopolysaccharide (LPS). During Gram staining, crystal violet dye and iodine form a large complex inside both cell types. During the brief decolourisation step (approximately 2 seconds), the thick peptidoglycan of gram-positive bacteria traps this complex, so the cells remain purple. In gram-negative bacteria, the thin peptidoglycan layer cannot retain the complex, which is washed out, leaving the cells colourless. The subsequent pink counterstain (safranin) then colours only the gram-negative cells pink. This is why gram-positive bacteria appear purple and gram-negative bacteria appear pink under the microscope.",marks:10}
+  ],
+  4: [
+    {q:"Describe the process of DNA replication in bacteria, explaining the difference between the leading strand and the lagging strand. Why are Okazaki fragments formed on only one strand?",model:"Bacterial DNA replication begins at the origin of replication (oriC) and proceeds bidirectionally to the termination site (ter). The two strands of the double helix separate, and DNA polymerase synthesises new complementary strands in the 5' to 3' direction only. On the leading strand, DNA polymerase can synthesise continuously in the same direction as the replication fork movement, producing one uninterrupted strand of new DNA. On the lagging strand, however, synthesis must occur in the opposite direction to fork movement, so DNA polymerase can only synthesise short fragments (Okazaki fragments) as the fork opens up new template. These fragments are subsequently joined together by the enzyme ligase to form a continuous strand. Okazaki fragments form only on the lagging strand because DNA polymerase can only add nucleotides in the 5' to 3' direction, and the lagging strand template runs in the opposite orientation relative to fork movement.",marks:10},
+    {q:"Explain the difference between a silent mutation and a loss-of-function mutation in a bacterial gene. Provide an example of how each could affect the phenotype of a bacterium.",model:"A silent mutation is a point mutation (single base change) that alters the DNA codon but does not change the amino acid encoded, due to the redundancy (degeneracy) of the genetic code where multiple codons can specify the same amino acid. For example, a change from GCU to GCC both encode alanine, so the protein produced is identical and the bacterium's phenotype is unaffected. A loss-of-function mutation changes the DNA sequence in a way that the encoded protein can no longer perform its function. This could be a substitution that changes a critical amino acid, or a deletion/insertion that causes a frameshift, potentially introducing a premature stop codon that truncates the protein. For example, if a frameshift mutation occurs in a flagella gene, it could truncate the flagellar protein, rendering the bacterium non-motile and potentially reducing its ability to cause disease by preventing it from reaching target tissues.",marks:10},
+    {q:"A deletion of a single nucleotide occurs in the middle of a gene encoding an essential bacterial protein. Explain the consequences of this mutation at the molecular level and for the bacterium's survival.",model:"A single nucleotide deletion causes a frameshift mutation, meaning all codons downstream of the deletion are shifted by one position. This changes the reading frame so that completely different amino acids are encoded from that point onward. Critically, a frameshift often introduces a premature stop codon (TAA, TAG, or TGA), which truncates the protein early, producing a shortened, non-functional protein. Since the gene encodes an essential protein (one required for the bacterium to survive), the loss of this functional protein constitutes a lethal mutation. The bacterium would be unable to carry out the essential function and would fail to replicate, effectively dying. This demonstrates why the DNA repair mechanisms (mismatch repair, excision repair, double-strand break repair) are so important, though they are not always successful or accurate.",marks:10},
+    {q:"Bacteria can accumulate mutations much faster than humans. Explain the biological reasons for this rapid accumulation, referring to generation time and population size.",model:"Bacteria accumulate mutations rapidly for two main reasons. First, their generation time is extremely short, approximately 20 minutes for a typical bacterium like E. coli, compared to decades for humans. This means that many rounds of DNA replication occur in a short period, and since mutations arise during replication (at a rate of approximately 1 error per 10 billion nucleotides incorporated, meaning roughly every third cell division for E. coli), mutations accumulate much more frequently on a calendar-time basis (approximately one per hour). Second, bacterial populations are enormous: a single colony on an agar plate contains over a million cells. Large population sizes mean that even rare mutations will occur in some individuals within the population, providing raw material for natural selection. The combination of rapid reproduction and massive population sizes means evolutionary changes that might take thousands of years in humans can occur in days or weeks in bacteria.",marks:10},
+    {q:"Explain how the proofreading function of DNA polymerase helps maintain the integrity of the bacterial genome, and discuss what happens when proofreading fails.",model:"During DNA replication, DNA polymerase occasionally incorporates an incorrect base (e.g., placing a T where a G should be). The proofreading function involves an exonuclease enzyme that detects the mismatched base, removes (excises) the incorrect nucleotide, and replaces it with the correct one. This proofreading mechanism greatly reduces the error rate of DNA replication. However, proofreading is not perfect, and some errors slip through at a rate of approximately 1 in every 10 billion nucleotides incorporated. When proofreading fails, the incorrect base becomes permanently incorporated into the DNA. Upon subsequent replication, the mismatched base is treated as the template, so the error is propagated and amplified in all future daughter cells. Additional repair mechanisms (mismatch repair, excision repair) exist as backup systems, but these are also not always successful, meaning some mutations become permanent features of the genome that can affect protein function and bacterial phenotype.",marks:10}
+  ],
+  5: [
+    {q:"Compare and contrast the three mechanisms of horizontal gene transfer in bacteria: conjugation, transduction, and transformation. For each, identify the source of donor DNA and the mechanism of transfer.",model:"Conjugation involves the direct transfer of plasmid DNA from a donor bacterium to a recipient bacterium through a conjugative pilus (sex pilus). The donor DNA source is a conjugative plasmid, which replicates via rolling circle replication during transfer, so the donor retains a copy. The process requires direct cell-to-cell contact. Transduction involves the transfer of DNA via bacteriophages (viruses that infect bacteria). During phage replication inside a host cell, some host bacterial DNA may be accidentally packaged into phage particles. When these phages infect a new bacterial cell, they inject the donor DNA along with or instead of phage DNA. Transformation involves the uptake of free (naked) DNA from the environment by a competent bacterial cell. The DNA source can be plasmid DNA, chromosomal DNA, or phage DNA released from dead bacteria. The recipient must be in a competent state, either naturally induced by environmental signals or artificially induced in the laboratory (chemically or by electroporation). In all three cases, the acquired DNA can potentially integrate into the recipient's chromosome and be inherited by daughter cells.",marks:10},
+    {q:"Describe the design and expected results of a mating experiment to determine whether a plasmid is conjugative. Include the controls needed and explain how you would select for transconjugants.",model:"A mating experiment requires a donor strain carrying the plasmid of interest with a selectable marker (e.g., antibiotic resistance gene A on the plasmid) and a recipient strain with a different selectable marker on its chromosome (e.g., antibiotic resistance gene B). The two strains are mixed together on a non-selective agar plate and incubated at optimal temperature (e.g., 37 degrees C for E. coli) for approximately 5-6 hours to allow conjugation. The mixture is then plated onto selective agar containing both antibiotics A and B. On this plate, donor cells cannot grow (they lack resistance to B), recipient cells cannot grow (they lack resistance to A), and only transconjugants (recipients that have acquired the plasmid carrying gene A) can grow, as they possess both resistance genes. If colonies appear, the plasmid is conjugative. Controls include plating donor and recipient separately on the double-antibiotic plate to confirm neither can grow alone.",marks:10},
+    {q:"The 2011 German E. coli O104:H4 outbreak strain was described as a 'hybrid' of two E. coli pathotypes. Explain what is meant by this, identifying the two pathotypes and the virulence factors each contributed.",model:"The outbreak strain was a hybrid of enterohaemorrhagic E. coli (EHEC) and enteroaggregative E. coli (EAEC). From the EHEC lineage, it acquired the Shiga toxin 2a gene (stx2a), which was encoded by a bacteriophage that had integrated into the chromosome as a prophage. Shiga toxin causes bloody diarrhoea and can lead to haemolytic uraemic syndrome (HUS) and kidney failure. From the EAEC lineage, it carried the pAA plasmid encoding aggregative adherence fimbriae, which enable tight adhesion of bacteria to intestinal epithelial cells, facilitating colonisation. This unprecedented combination meant the strain could both colonise the gut aggressively (EAEC trait) and produce a potent toxin (EHEC trait), explaining why it caused the highest recorded incidence of HUS-associated EHEC disease. The hybrid nature arose through horizontal gene transfer events, specifically phage-mediated transduction of the Shiga toxin gene into an ancestral EAEC strain.",marks:10},
+    {q:"Explain how conjugative plasmids use toxin-antitoxin systems and active partitioning to ensure their stable inheritance during bacterial cell division.",model:"Active partitioning systems encoded on conjugative plasmids ensure that during cell elongation prior to division, plasmid copies are physically pushed or pulled to opposite ends of the cell. This guarantees that when the cell divides, each daughter cell receives at least one copy of the plasmid. If this system fails or is absent, plasmids may segregate unevenly, with one daughter cell receiving all copies and the other receiving none. Toxin-antitoxin (TA) systems provide a backup mechanism known as post-segregational killing. The plasmid encodes both a stable toxin and an unstable antitoxin. As long as the plasmid is present, the antitoxin is continuously produced to neutralise the toxin. If a daughter cell fails to inherit the plasmid, it can no longer produce the antitoxin, but the residual toxin remains active and kills that plasmid-free cell. Together, these mechanisms ensure that only plasmid-bearing cells survive, maintaining the plasmid within the bacterial population even though carrying it is metabolically costly.",marks:10},
+    {q:"Explain how a bacteriophage can convert a non-pathogenic bacterium into a pathogenic one, using a specific example from the lecture material.",model:"Bacteriophages (viruses that infect bacteria) can carry virulence genes and integrate them into the bacterial chromosome through the lysogenic cycle. When a phage infects a bacterium, it can inject its DNA, which integrates into the host chromosome at specific sequences, becoming a prophage. This prophage is then replicated along with the chromosome and inherited by daughter cells. If the prophage carries virulence genes, such as toxin-encoding genes, the bacterium gains the ability to produce those toxins and cause disease. A specific example is the Shiga toxin-producing phage in E. coli. In the 2011 German outbreak, the E. coli O104:H4 strain acquired its stx2a (Shiga toxin 2a) gene from a bacteriophage that integrated into the chromosome. This phage was most closely related to phages found in EHEC O157:H7 strains, indicating that the toxin gene was transferred between different E. coli pathotypes via transduction, converting an enteroaggregative strain into a deadly Shiga toxin producer.",marks:10}
+  ],
+  6: [
+    {q:"Compare and contrast parasitism, mutualism, and commensalism as forms of symbiosis. Provide a specific example of each from the lecture material.",model:"All three are forms of symbiosis (organisms living together) but differ in the costs and benefits to each party. Mutualism benefits both organisms with no harm to either; an example is the cleaner fish relationship where the cleaner fish receives a meal while the larger fish is cleaned of parasites. Commensalism benefits one organism while the other is neither helped nor harmed; an example is clownfish living in sea anemones, where the clownfish gains protection but the sea anemone is unaffected. Parasitism benefits one organism (the parasite) at the expense of the other (the host); an example is the sandfly transmitting Leishmania, which causes leishmaniasis in the host. The key distinction is the balance of benefit and harm: mutualism is mutually positive, commensalism is positive-neutral, and parasitism is positive-negative.",marks:10},
+    {q:"Explain the three-pronged approach to parasite control (management, epidemiology, treatment) and argue why treatment should be considered the last resort. Use examples relevant to livestock production.",model:"The three-pronged approach consists of management, epidemiology, and treatment. Management is the most important component and involves preventing parasite-host contact through practices such as shearing/crutching sheep to reduce ectoparasite habitat, rotating pastures to reduce faecal parasite burden, maintaining good nutrition and body condition to support host immunity, and quarantining new animals (biosecurity). Epidemiology involves understanding when and where parasites are active (seasonality, geography, time of day) and applying that knowledge; for example, stabling horses at night to avoid biting insects that are active after dark. Treatment (drug administration) should be the last resort because widespread and premature use of antiparasitic drugs has led to significant anthelmintic resistance globally, rendering many drugs ineffective. If management and epidemiological strategies can prevent or reduce parasite burdens to tolerable levels, treatment can be avoided entirely, preserving drug efficacy for when it is truly needed.",marks:10},
+    {q:"Describe the life cycle of Giardia duodenalis, including the two main stages, the route of transmission, and explain why this parasite is particularly difficult to eliminate from kennel or daycare environments.",model:"Giardia duodenalis has a direct life cycle involving two stages: the trophozoite and the cyst. Trophozoites are the active, flagellated feeding stage found inside the host's gut, where they attach to the intestinal lining via a ventral disc (sucker) and cause chronic diarrhoea by disrupting nutrient absorption. Trophozoites reproduce asexually within the host, allowing rapid population growth. As they pass through the gut, some encyst to form the cyst stage, which is shed in faeces. Transmission is faecal-oral: new hosts become infected by ingesting cysts from contaminated water, food, or surfaces. Giardia is particularly difficult to eliminate from kennels and daycare centres because the cysts are extremely environmentally resistant and hard to destroy, hosts can be asymptomatic carriers (shedding infective cysts without showing diarrhoea), the infective dose is very low, and the faecal-oral transmission route is easily facilitated in crowded environments. Rigorous hygiene, sanitation, and bleach disinfection are essential for control.",marks:10},
+    {q:"Explain the difference between a definitive host and an intermediate host in a parasite's life cycle. Why might having multiple intermediate hosts be advantageous for a parasite species?",model:"A definitive host is where the parasite undergoes sexual reproduction (if it occurs) and completes the most critical stage of its life cycle. All parasites require a definitive host. An intermediate (in-between) host is one where sexual reproduction does not occur, but the parasite may undergo asexual reproduction or development; it serves as a bridge or stepping stone to reach the definitive host. Having multiple intermediate hosts can be advantageous because it provides the parasite with more pathways to complete its life cycle. If one host species becomes rare or is eliminated from an area, the parasite can still persist by utilising alternative intermediate hosts as reservoirs. This acts as a buffer against environmental changes or host population fluctuations, increasing the parasite's long-term survival and transmission success, even though more complex life cycles take longer to complete.",marks:10},
+    {q:"A farmer notices production losses in their sheep flock: wool quality is declining, and animals appear irritated and are rubbing against fences. Explain what ectoparasite could be responsible, describe its classification as a type of parasite, and recommend a control strategy using the three-pronged approach.",model:"The most likely ectoparasite is Bovicola ovis (sheep body louse), a biting louse that feeds on the surface of the skin. It is classified as an obligate parasite (must have a host to complete its life cycle) and a permanent parasite (remains on the host at all times, as it cannot survive long in the environment, similar to the 'Goldilocks' concept of requiring the host's microhabitat). For control using the three-pronged approach: Management should include maintaining sheep in good body condition with adequate nutrition to support immunity, shearing or crutching to physically reduce louse habitat, and implementing biosecurity by quarantining new animals before introducing them to the flock. Epidemiology involves understanding that lice are permanent parasites active year-round but populations increase in winter when fleece is long and conditions favour their reproduction. Treatment with an appropriate ectoparasiticide should be applied only when infestation reaches levels causing production loss, ideally timed after shearing when louse numbers are lowest and chemical contact is maximised.",marks:10}
+  ],
+  7: [
+    {q:"Explain the difference between a repressible operon and an inducible operon, using the trp operon and the lac operon in E. coli as examples. In your answer, describe the role of the repressor in each system and what triggers the change in gene expression.",model:"The trp operon is a repressible operon: its repressor is normally inactive, so the genes for tryptophan synthesis are transcribed by default. When tryptophan accumulates in the environment, it acts as a co-repressor by binding to the inactive repressor protein, activating it so that it binds the operator and blocks RNA polymerase, thereby shutting off transcription. In contrast, the lac operon is an inducible operon: its repressor is normally active and bound to the operator, preventing transcription. When lactose is present, it binds to the active repressor and changes its conformation so it can no longer bind the operator, allowing RNA polymerase to transcribe the three structural genes (lacZ, lacY, lacA) needed to acquire and break down lactose. Thus, the trp operon is switched off by the presence of its end product, while the lac operon is switched on by the presence of its substrate.",marks:10},
+    {q:"Describe the two-part control mechanism of the lac operon. Why does E. coli require both low glucose levels and the presence of lactose for full expression of the lac operon genes?",model:"E. coli preferentially uses glucose as its primary energy source, so the lac operon is only fully activated when glucose is depleted and an alternative sugar (lactose) is available. The first part of the control involves glucose levels: when glucose is scarce, cyclic AMP (cAMP) accumulates in the cell and binds to the catabolite activator protein (CAP/CRP). This CAP-cAMP complex binds upstream of the promoter and enhances the ability of RNA polymerase to bind and initiate transcription. The second part involves lactose: the lac repressor is constitutively produced and normally sits on the operator, blocking transcription. When lactose is present, it binds the repressor and causes a conformational change that releases it from the operator. Both conditions must be met simultaneously for RNA polymerase to move through and transcribe the lacZ, lacY, and lacA genes efficiently.",marks:10},
+    {q:"Explain how the Shiga toxin genes of enterohemorrhagic E. coli (EHEC) are regulated. What triggers their expression, and why is this relevant to the clinical use of antibiotics in EHEC infections?",model:"The Shiga toxin genes in EHEC are encoded on lysogenic bacteriophages integrated into the bacterial genome as prophages. In the lysogenic state, a CI repressor protein binds to the operator region and prevents transcription of the phage genes, including the Shiga toxin genes. When the bacterium experiences a stress response — such as oxidative stress from hydrogen peroxide in the gut, or exposure to UV light or certain antibiotics that interfere with DNA replication — the CI repressor is degraded. This allows the prophage to excise from the genome and re-enter the lytic cycle, during which the Shiga toxin genes are transcribed at high levels and toxin is produced. This is clinically important because treating EHEC infections with antibiotics can trigger the SOS/stress response, paradoxically increasing Shiga toxin production and worsening the patient's condition, potentially leading to hemolytic uremic syndrome.",marks:10},
+    {q:"A researcher wants to produce large quantities of a specific antigen for a diagnostic test. Describe how an E. coli expression system using a T7 promoter and IPTG induction could be used to achieve this goal.",model:"The researcher would clone the gene encoding the antigen of interest into an expression vector containing a T7 promoter and a selectable antibiotic resistance marker. This plasmid is transformed into a special E. coli strain that carries the T7 RNA polymerase gene under the control of a lac promoter. Under normal growth conditions, the lac repressor blocks expression of the T7 RNA polymerase, so the gene of interest is not transcribed. When the researcher adds IPTG (a lactose analogue) to the culture medium, IPTG binds the lac repressor and releases it from the operator, allowing transcription of the T7 RNA polymerase gene. The T7 RNA polymerase then recognises the T7 promoter on the expression vector and drives high-level transcription of the antigen gene. Using a high-copy-number plasmid amplifies protein production further, and the antibiotic resistance marker ensures only bacteria carrying the plasmid survive in selective media.",marks:10},
+    {q:"Describe how the virulence factors of Vibrio cholerae (cholera toxin and toxin co-regulated pilus) are regulated. Include the role of the ToxT activator and explain why these factors are not produced in laboratory conditions without special modifications.",model:"Vibrio cholerae possesses two major virulence factors: the cholera toxin (encoded by the ctxAB operon on a lysogenic bacteriophage) and the toxin co-regulated pilus (TCP, encoded on a 40 kb pathogenicity island). Both are regulated by the ToxT transcriptional activator, which binds to the promoters of both operons and activates their transcription. ToxT itself is activated only when environmental signals characteristic of the human gut are detected, including appropriate temperature, pH, and the presence of bicarbonate. In the absence of these signals — such as in standard laboratory conditions — ToxT remains inactive and neither virulence factor is expressed. Additionally, ToxT exhibits autoregulation, as its own gene is located within the TCP operon, so it activates its own expression in a positive feedback loop. To study these virulence factors in vitro, researchers must simulate gut conditions to trigger the signalling cascade.",marks:10}
+  ],
+  8: [
+    {q:"Compare and contrast the life cycles of Fasciola hepatica (liver fluke) and the gastrointestinal nematodes of sheep. In your answer, identify the type of life cycle each has, the infective stage, and the key intermediate hosts involved.",model:"Fasciola hepatica has an indirect life cycle requiring an intermediate host (an aquatic snail), whereas gastrointestinal nematodes such as Haemonchus contortus have a direct life cycle with no intermediate host required. For F. hepatica, eggs are passed in faeces and hatch in water into miracidia (ciliated, actively swimming larvae) that torpedo into a snail. Inside the snail, they develop through redia and sporocyst stages before emerging as cercariae (flagellated swimmers). Cercariae attach to vegetation and become metacercariae, which are the infective stage ingested by grazing herbivores. For nematodes, eggs are passed in dung, hatch into L1 larvae, moult through L2, and the L3 (third-stage larva) is the infective stage that migrates onto grass and is ingested by the grazing animal. The key difference is the complexity: F. hepatica requires aquatic conditions and a snail host, while nematode transmission occurs directly through pasture contamination.",marks:10},
+    {q:"Explain why Ixodes holocyclus (the Australian paralysis tick) is becoming an increasing concern in southern Australian states such as Victoria. Include the mechanism by which it causes host death and the concept of acquired immunity.",model:"Ixodes holocyclus produces a neurotoxin called holocyclotoxin that causes ascending flaccid motor paralysis in its hosts, beginning in the hind limbs and progressing upward until it paralyses the respiratory muscles, leading to death by respiratory failure. Historically, this tick was confined to Queensland and northern coastal regions, but climate change — warmer temperatures and increased humidity extending southward along the coast — has expanded its range into Victoria and other southern areas. Native Australian wildlife, particularly bandicoots, have co-evolved with this tick and develop acquired immunity through repeated exposure to small doses of the toxin. However, domestic animals in newly affected areas (dogs, cats, livestock) are immunologically naive and highly susceptible. Critically, this acquired immunity is not permanent and requires ongoing re-exposure; animals removed from tick-endemic areas lose their immunity. A single adult female tick can kill a small dog, making it a significant veterinary concern in regions where hosts have no prior exposure.",marks:10},
+    {q:"Describe the life cycle and parasitic behaviour of Lucilia cuprina (the Australian sheep blowfly). Why is it considered one of the most economically important parasites in the Australian sheep industry?",model:"Lucilia cuprina is a facultative ectoparasite responsible for over 90% of fly strike (cutaneous myiasis) in Australian sheep. Adult females lay batches of eggs on the wool of sheep, particularly in areas soiled with faeces or urine that attract them via olfactory cues. Eggs hatch within approximately half a day into first-instar larvae that feed on skin secretions. Within a day, they moult to second-instar larvae whose mouth hooks are large enough to penetrate the skin, and third-instar larvae cause the most severe tissue damage. The entire life cycle takes only about 17 days, allowing explosive population growth with up to three generations in spring and two in autumn. It is economically devastating because massive larval feeding causes severe tissue destruction, secondary infections, pain, weight loss, reduced wool quality, and death if untreated. Control is increasingly difficult because L. cuprina has developed rampant resistance to the two remaining chemical growth regulators (cyromazine and dicyclanil), and mulesing — the most effective prevention method — faces significant animal welfare opposition.",marks:10},
+    {q:"A cattle farmer notices several animals are losing condition, appearing anemic, and some are showing signs of hind-limb weakness progressing toward the front of the body. Explain what parasites could be responsible and what management strategies you would recommend.",model:"The anaemia could be caused by heavy tick infestation, as female ticks (particularly one-host cattle ticks like Rhipicephalus australis) can each engorge with up to 5 mL of blood; with hundreds or thousands of ticks per animal, significant blood loss and anaemia result. The ascending hind-limb weakness progressing cranially is characteristic of tick paralysis caused by Ixodes holocyclus, whose holocyclotoxin causes ascending flaccid paralysis. Management recommendations would include: (1) immediately checking animals for ticks and removing any adult females found, particularly around the head and neck; (2) administering tick anti-serum if Ixodes holocyclus paralysis is suspected; (3) implementing acaricide treatment programs suited to the tick species present; (4) considering pasture management to reduce tick habitat by maintaining short grass and reducing humidity; and (5) if in a region newly encountering I. holocyclus due to climate range expansion, educating staff about the signs of tick paralysis and establishing a relationship with a veterinarian for rapid intervention.",marks:10},
+    {q:"Explain the concept of 'refugia' in the context of anthelmintic treatment of gastrointestinal nematodes in sheep. Why is it considered poor practice to treat all animals in a flock simultaneously?",model:"Refugia refers to the population of worms in the environment or in untreated animals that have not been exposed to anthelmintic drugs and therefore remain drug-susceptible. Maintaining refugia is critical because if all animals are treated simultaneously, only drug-resistant worms survive, and these resistant individuals breed exclusively with each other, rapidly producing a fully resistant population. By leaving some animals untreated — typically those that appear healthy and have low worm burdens — the susceptible worms in refugia dilute the resistant gene pool when mating occurs, slowing the development of widespread anthelmintic resistance. Modern best practice involves targeted selective treatment: identifying the animals most in need of treatment (e.g., those with poor body condition or high faecal egg counts) and treating only those individuals, rather than performing blanket mass drug administration across the entire flock.",marks:10}
+  ],
+  9: [
+    {q:"Explain why the physical structure of a virus (enveloped versus non-enveloped) is critical for determining appropriate biosecurity and disinfection procedures. Provide examples of each type and their environmental resilience.",model:"Enveloped viruses such as herpes viruses and influenza possess a lipid bilayer membrane studded with glycoproteins essential for host cell attachment and infection. This envelope is fragile and easily disrupted by detergents, changes in pH, temperature fluctuations, and drying, meaning these viruses are relatively easy to inactivate through standard disinfection measures like hand washing with soap and water. However, they require close contact for transmission because they do not persist long in the environment. Non-enveloped viruses such as parvovirus and rotavirus consist of a protein capsid surrounding nucleic acid, making them extremely resilient to detergents, drying, heat, pH changes, and most standard disinfectants. Parvovirus, for example, can persist in the environment for months to years and requires harsh chemicals like formalin for effective disinfection. Understanding this structural distinction directly informs whether standard hygiene measures will be sufficient or whether more aggressive decontamination protocols are needed.",marks:10},
+    {q:"Describe the general replication cycle of a virus, from attachment to release of new virions. Why do viruses require host cells to replicate, unlike bacteria?",model:"The viral replication cycle involves several sequential steps. First, the virus attaches to specific receptors on the host cell surface (such as sialic acid or heparan sulphate). It then penetrates through the cytoplasmic membrane and uncoats to release its nucleic acid into the host cell. Once inside, early mRNA is produced that encodes viral proteins including polymerases and structural proteins; the virus simultaneously shuts down host protein synthesis to commandeer cellular resources. The viral nucleic acid is then replicated, new structural components are synthesised, and progeny virions are assembled. Finally, new viruses are released either by budding through the cell membrane or by lysing (bursting) the cell open. Viruses cannot replicate independently because they lack their own ribosomes, energy-generating systems, and most of the enzymatic machinery required for nucleic acid replication and protein synthesis — they are obligate intracellular organisms that must hijack the host cell's existing machinery to reproduce.",marks:10},
+    {q:"A horse breeder is planning to transport several pregnant mares long-distance to attend a competition where horses from many different properties will be temporarily housed together. Using your knowledge of equine herpesvirus biology, explain the risks involved and recommend management strategies.",model:"Equine herpesvirus (EHV) establishes lifelong latent infections in neural tissue and can reactivate during periods of stress. Long-distance transportation is a major stressor for horses, and mixing animals from different properties forces re-establishment of social hierarchies, compounding stress levels. Reactivation in even one latently infected horse can lead to viral shedding and respiratory transmission to naive in-contact animals in the close confines of temporary stabling. EHV can then disseminate systemically via the bloodstream and infect endothelial cells in the endometrium (causing abortion in pregnant mares) or in vessels supplying the central nervous system (causing potentially fatal neurological disease). Recommended strategies include: vaccinating all horses prior to transport, minimising transport duration and stress, keeping pregnant mares in small stable groups rather than mixing with unfamiliar horses, avoiding co-housing with horses of unknown health status, practising strict biosecurity with separate equipment for each group, and ideally not transporting late-pregnant mares to large multi-property gatherings at all.",marks:10},
+    {q:"Compare and contrast PCR-based diagnostics with rapid antigen tests (lateral flow assays) for viral disease detection. Under what circumstances would each be preferred?",model:"PCR-based diagnostics detect viral nucleic acid and offer high sensitivity and specificity; they can be quantitative (reporting cycle threshold values where lower CT indicates more viral material), do not require infectious virus (just intact nucleic acid), and can provide results within hours. However, PCR requires specialised and expensive equipment, trained laboratory personnel, and a dedicated laboratory setting. Rapid antigen tests (lateral flow assays) detect viral proteins and are extremely fast (minutes), inexpensive, and can be performed by untrained individuals in the field or at home. Their limitations include lower sensitivity (requiring higher viral loads to register positive, leading to potential false negatives) and potential loss of specificity as viral antigens mutate over time. PCR is preferred when accurate individual diagnosis is critical, when viral loads may be low, or when quantification is needed. Rapid antigen tests are preferred for large-scale population screening during epidemics of highly contagious diseases where the key goal is rapid identification of positive individuals across many tests rather than perfect accuracy on each individual result.",marks:10},
+    {q:"Explain why lumpy skin disease (a capripoxvirus) is considered one of the most significant biosecurity threats to the Australian cattle industry. Include in your answer the mechanisms of transmission and the features that make this virus difficult to control.",model:"Lumpy skin disease (LSD) is caused by a capripoxvirus that produces characteristic skin nodules and scab lesions containing extremely high concentrations of virus. As a poxvirus, it has a complex structure that makes it highly resilient in the environment — infectious scab material can persist for extended periods, enabling indirect transmission through environmental contamination. The virus is also transmitted mechanically by biting insects (not true biological transmission, but physical transfer of virus on mouthparts), meaning control of insect vectors across Australia's vast pastoral lands is essentially impossible. Additionally, contaminated equipment or needles used between animals can spread the virus. Australia's cattle herd of approximately 38 million animals is entirely naive and immunologically susceptible. An incursion would halt all cattle exports and severely impact dairy production, causing billions of dollars in economic losses. The proximity of LSD in Indonesia makes the threat geographically imminent, and the virus's environmental stability, multiple transmission routes, and the vast scale of Australian cattle operations make containment extremely challenging.",marks:10}
+  ],
+  10: [
+    {q:"Explain what the ITS region is, why it is considered the universal barcode for fungi, and how it is used in fungal taxonomy. What are its advantages and limitations?",model:"The ITS (Internal Transcribed Spacer) region is part of the nuclear ribosomal DNA (nrDNA), located between the small subunit (SSU), the 5.8S gene, and the large subunit (LSU). There are two ITS regions — ITS1 (between SSU and 5.8S) and ITS2 (between 5.8S and LSU). It is considered the universal fungal barcode because: (1) all fungi possess it, enabling universal primer design; (2) it exists in multiple copies per genome, making it easy to amplify even from small samples; and (3) the flanking regions (SSU, 5.8S, LSU) are highly conserved across fungi, allowing design of universal primers, while the ITS1 and ITS2 regions themselves are highly variable, providing species-level discrimination. Its main limitation is that for closely related species within many genera, ITS alone cannot resolve species boundaries because the variation is insufficient. Therefore, ITS is typically used as a first-pass identification to determine genus, after which additional loci are sequenced (multi-locus sequence analysis, MLSA) to achieve reliable species-level identification.",marks:10},
+    {q:"Describe the role of arbuscular mycorrhizal fungi (AMF) in plant nutrition. Include in your answer the key structures involved and the nature of the symbiotic relationship.",model:"Arbuscular mycorrhizal fungi (AMF) are obligate biotrophs within the Mucoromycota that form symbiotic associations with plant roots. The AMF spore germinates in the soil and its hyphae explore the surrounding area; plant root exudates stimulate the hyphae to branch extensively, increasing the chance of root contact. Upon reaching the root, the hyphal tip swells and forms a hyphopodium that adheres to the root surface. The plant epidermal cell forms a pre-penetration apparatus (PPA) that guides intracellular hyphal growth. In the inner root cortex, the hyphae branch repeatedly to form arbuscules — highly branched, tree-like structures (from Latin 'arbusculum' meaning small tree) — which are the primary sites of nutrient exchange between the fungus and plant. The AMF extends its hyphal network far beyond the root zone, accessing water and mineral nutrients (especially phosphorus) that the roots alone cannot reach, and transfers these to the plant. In return, the plant provides the fungus with sugars and carbon compounds. AMF can also enhance plant tolerance to drought and biotic stresses, and may reduce weed germination if weeds are non-hosts.",marks:10},
+    {q:"Explain the concept of fungicide resistance in fungal plant pathogens. How does resistance develop in a population, and what strategies can growers use to delay its development?",model:"Fungicide resistance develops through a process of selection within genetically diverse fungal populations. In any natural pathogen population, a small number of individuals carry random mutations that confer reduced sensitivity or resistance to a particular fungicide mode of action. When the same fungicide is applied repeatedly, it kills susceptible individuals while the naturally resistant ones survive and reproduce. Over successive seasons, the resistant proportion increases until the population is predominantly resistant and the fungicide fails to control disease. Importantly, the fungicide does not cause the mutations — it selects for pre-existing resistant variants. Strategies to delay resistance development include: (1) avoiding susceptible crop cultivars to reduce overall disease pressure; (2) crop rotation to lower pathogen inoculum levels; (3) using non-chemical management methods (hygiene, biological control) to reduce reliance on fungicides; (4) spraying only when economically justified rather than as routine prophylaxis; and (5) rotating and mixing fungicides with different modes of action so that individuals resistant to one mode are killed by another. Critically, when fungicide is applied, it must always be used at the full recommended rate — diluted applications do not kill moderately resistant individuals and accelerate resistance evolution.",marks:10},
+    {q:"A fruit grower notices brown rot symptoms appearing on nectarines after harvest, despite the fruit appearing healthy when picked. Explain the concept of quiescent (latent) infection and its implications for disease management timing.",model:"Quiescent or latent infection occurs when a pathogen infects the host during the growing season but remains dormant without causing visible symptoms until conditions change — typically after harvest when the fruit begins to ripen. In the case of brown rot (caused by Monilinia spp., an Ascomycota), infection often begins during flowering in the orchard: fungal spores land on flowers and the pathogen enters the developing fruit. However, it remains quiescent in the immature fruit because conditions are not yet favourable for symptom expression. After harvest, as the fruit ripens and its defences weaken, the fungus becomes active and produces visible rot and masses of spores (conidia in chains). The critical implication for management is that disease control must begin in the orchard during flowering and fruit development, not after harvest. By the time post-harvest symptoms appear, it is too late for intervention. Orchard-stage fungicide applications during flowering can prevent the initial infection and thus prevent post-harvest losses.",marks:10},
+    {q:"Draw and label a generalised disease cycle for an ascomycete plant pathogen such as powdery mildew on barley. Describe what would be included in your diagram, distinguishing between the sexual and asexual cycles and their respective roles.",model:"The diagram should show two interconnected cycles. The large outer (sexual) cycle occurs once per season: at the end of the growing season, the fungus produces ascocarps (sexual fruiting bodies) containing asci, each holding 8 ascospores. These are survival structures that overwinter (or over-summer in Australia). At the beginning of the next growing season, ascospores are released and, together with conidia (asexual spores), initiate primary infection on new barley plants. The inner (asexual/epidemic) cycle repeats multiple times during the growing season: infected plants produce conidiophores bearing masses of conidia (asexual spores) on the plant surface, creating the characteristic powdery appearance. These conidia are dispersed by wind to infect neighbouring plants, producing new infections within days. This rapid asexual cycling is responsible for epidemic build-up in the field. The diagram should label: ascospores and conidia as primary inoculum, conidiophores and conidia in the repeating epidemic cycle, the ascocarp as the survival/overwintering structure, and arrows showing the direction of each cycle.",marks:10}
+  ],
+  11: [
+    {q:"Compare and contrast ectoparasitic, migratory endoparasitic, and sedentary endoparasitic nematodes in terms of their feeding behaviour, movement within the host, and potential to act as virus vectors.",model:"Ectoparasitic nematodes feed from outside the root using a characteristically very long stylet to pierce cells and extract nutrients. They remain mobile in the soil and can move between plants, which critically enables them to act as vectors of plant viruses — acquiring a virus from one plant and transmitting it to another within hours, retaining the virus for up to a month. Migratory endoparasitic nematodes (e.g., root lesion nematodes like Pratylenchus) enter the root and continuously move through root tissue, producing cell wall-degrading enzymes and causing extensive necrotic lesions as they destroy cells along their path. All motile juvenile and adult stages can infect plants. They do not vector viruses because they remain inside the root. Sedentary endoparasitic nematodes (e.g., root-knot nematodes Meloidogyne, cyst nematodes Heterodera) enter the root as J2 juveniles, migrate to the vascular tissue, then become permanently immobile. They establish feeding sites, moult in place, and the females swell dramatically — either forming egg-filled cysts (cyst nematodes) or inducing root galls containing eggs (root-knot nematodes). They cannot vector viruses due to their immobility.",marks:10},
+    {q:"Explain the difference between a resistant crop and a tolerant crop in the context of nematode management. Why might planting a tolerant cultivar be problematic for the following season's crop?",model:"A resistant crop prevents nematode infection entirely — nematodes cannot successfully parasitise the plant, so the crop suffers no yield loss and, crucially, the nematode population in the soil does not increase during the growing season. A tolerant crop, by contrast, does become infected by nematodes and allows them to reproduce, but the plant can still produce acceptable yields because it tolerates the parasitism without showing severe symptoms. The danger of planting a tolerant cultivar is that although the current season's yield may be satisfactory, the nematode population multiplies throughout the season because the crop serves as a functional host. By the end of the season, soil nematode populations can be significantly elevated. If the following crop is a susceptible (non-tolerant, non-resistant) variety, it will face a much higher nematode burden than originally present, potentially resulting in severe yield loss. Therefore, growers using tolerant cultivars must plan carefully for the next rotation, following with either a resistant cultivar or a non-host crop to bring nematode numbers back down.",marks:10},
+    {q:"Describe the general life cycle of plant-parasitic nematodes, identifying the key stages. Using root-knot nematodes (Meloidogyne spp.) as an example, explain which stage is infective and how the nematode causes the characteristic galling symptoms.",model:"All plant-parasitic nematodes share a general life cycle of six stages: egg, four juvenile stages (J1–J4), and adult. J1 develops and moults within the egg, so J2 is the stage that hatches and emerges into the soil. In root-knot nematodes, J2 is the infective stage: it actively seeks out roots, attracted by root exudates, and penetrates the root tissue using its prominent stylet with characteristic basal knobs. Once inside, the J2 migrates intercellularly to the vascular tissue where it becomes sedentary. It then injects secretions through its hollow stylet into surrounding plant cells, manipulating plant hormones and causing the cells to enlarge and multiply abnormally. This produces the characteristic galls or knots on the roots. The nematode moults through J3 and J4 to become an adult while remaining in place. Females lay eggs in or on the root surface beneath the epidermis, contributing to further galling. The entire cycle can be completed in 2–4 weeks under favourable conditions, allowing multiple generations and escalating damage during a single growing season.",marks:10},
+    {q:"Explain how nematodes can form disease complexes with other plant pathogens. Use a specific example to illustrate why understanding these complexes is important for both research and field management.",model:"Plant-parasitic nematodes often interact synergistically with other soil-borne pathogens such as fungi and bacteria to cause more severe disease than either pathogen alone. Nematodes physically pierce root tissue with their stylets, creating wounds that serve as entry points for bacteria and fungi that cannot actively penetrate intact plant tissue. Additionally, nematode secretions and feeding damage can alter root exudates and the surrounding soil microbiome, further facilitating secondary infections. A well-documented example is potato early dying syndrome in Australia, caused by the interaction of root lesion nematodes (Pratylenchus spp.) and the fungus Verticillium. Neither pathogen alone reproduces the full severity of symptoms seen in the field — researchers working on either pathogen individually in glasshouse experiments could not replicate the disease until both organisms were inoculated together. This demonstrates why understanding disease complexes is critical: incorrect diagnosis of a single causal agent leads to ineffective management, and research must account for multi-pathogen interactions to develop practical control strategies.",marks:10},
+    {q:"A wheat grower in southern Australia finds patches of stunted, chlorotic plants in their field. Upon digging up affected plants, the roots appear stubby and brush-like. Soil testing reveals high populations of cereal cyst nematode (Heterodera). Describe the biology of this pathogen and recommend an integrated management plan.",model:"Cereal cyst nematode (Heterodera) is a sedentary endoparasitic nematode. The J2 stage hatches from eggs within cysts (the hardened remains of dead females) and is the infective stage that penetrates roots, migrates to the vascular tissue, and becomes sedentary. Females swell and their bodies transform into protective cysts containing hundreds of eggs that can survive in soil for many years, even without a host, making eradication extremely difficult. The brush-like, stunted root system results from the nematode disrupting root development and nutrient/water uptake. An integrated management plan should include: (1) soil testing before planting to assess nematode population levels against economic damage thresholds; (2) crop rotation with legume non-host crops (e.g., chickpea, lentil) that do not support cyst nematode reproduction, allowing populations to decline; (3) planting resistant wheat cultivars where available; (4) adjusting sowing time to cooler soil temperatures when J2 hatching is reduced; (5) maintaining a fallow period if populations are extremely high; and (6) avoiding moving contaminated soil on machinery between paddocks.",marks:10}
+  ],
+  12: [
+    {q:"Explain how bacteria differ from fungi and nematodes in their mode of plant infection. Why does this difference in penetration strategy have important implications for disease management?",model:"Unlike fungi, which can actively penetrate plant tissue using specialised infection structures such as appressoria that generate turgor pressure to physically breach the cuticle, bacteria cannot actively penetrate intact plant surfaces. Bacteria rely entirely on passive entry through natural openings (stomata, lenticels, hydathodes) or wounds caused by insects, hail, wind damage, pruning, or other mechanical injury. This passive mode of infection has critical management implications: (1) wound prevention becomes paramount — careful handling during harvest, minimising mechanical damage, and avoiding unnecessary pruning during wet weather can significantly reduce bacterial infection; (2) controlling insect vectors that create wounds is important; (3) sanitation practices (clean tools, equipment, footwear) are essential because bacteria are commonly spread by water splash, wind, and human activity to wound sites; and (4) unlike fungal diseases where systemic fungicides can be applied, bactericides are generally expensive and impractical, making prevention through cultural practices and resistant cultivars the primary management strategies.",marks:10},
+    {q:"Describe the three modes of virus transmission by insect vectors (non-persistent, semi-persistent, and persistent). Explain why applying insecticides is only recommended for viruses transmitted in a persistent manner.",model:"In non-persistent transmission, the virus attaches only to the insect's mouthparts (stylet) and persists for just a few hours before being lost. The insect acquires and transmits the virus very rapidly during brief feeding probes. In semi-persistent transmission, the virus penetrates deeper into the foregut and persists for a few days before being cleared. In persistent transmission, the virus enters the insect's haemolymph, replicates within the vector, and remains for the insect's lifetime; however, there is an incubation period of hours to days before the insect becomes infectious. Insecticides are only recommended for persistently transmitted viruses because: (1) with non-persistent viruses, transmission occurs so rapidly (seconds to minutes of probing) that by the time insecticide is applied, the damage is already done; (2) insecticide application can actually worsen non-persistent virus spread by agitating aphids, causing them to make more frequent short feeding probes on more plants rather than settling to feed on one; and (3) the incubation period of persistent viruses provides a time window during which vector control can prevent the insect from becoming infectious and transmitting to new plants.",marks:10},
+    {q:"Explain why Xylella fastidiosa is considered the number one biosecurity threat to Australian agriculture. Describe the challenges associated with its detection and the potential economic impact of its introduction.",model:"Xylella fastidiosa is a xylem-inhabiting bacterium that can infect an extremely wide range of economically important crops including grapevines (causing Pierce's disease), almonds, avocados, citrus, and stone fruits. It is transmitted by xylem-feeding insect vectors such as sharpshooters and spittlebugs. The bacterium colonises the xylem vessels, blocking water transport and causing wilting, leaf scorch, and progressive plant death over several years. Detection is extremely challenging because early symptoms closely mimic abiotic stresses such as water stress, salinity, or nutrient deficiency, making visual identification unreliable. Entire vineyards and orchards in affected countries (e.g., Spain, Italy, USA) have been destroyed with no effective cure available — infected areas must be abandoned. If introduced to Australia along with a competent insect vector, the potential losses to the grape, almond, avocado, and other horticultural industries could reach billions of dollars. Australia's entire horticultural sector is currently naive to this pathogen, and the combination of a wide host range, difficulty of early detection, lack of cure, and vector-dependent spread makes it the highest-priority plant biosecurity threat.",marks:10},
+    {q:"A farmer growing mung beans in Queensland notices water-soaked leaf spots with yellow halos. Explain the likely diagnosis, the mechanism behind the symptom presentation, and recommend appropriate management strategies.",model:"The symptoms are characteristic of halo blight, caused by a bacterial pathogen, one of the most important diseases of mung beans in Queensland and New South Wales. The water-soaked appearance of the spots occurs because the bacterium, upon entering through stomata or wounds, multiplies in the intercellular spaces and releases toxins and enzymes that damage cell membranes, causing water to leak from cells and accumulate between them. The yellow (chlorotic) halo surrounding each lesion is caused by bacterial toxins that diffuse outward from the infection site and destroy chlorophyll in surrounding tissue. Since this pathogen is seed-borne, management should include: (1) using certified pathogen-free seed as the primary control measure; (2) crop rotation to non-host crops to reduce inoculum in the field; (3) avoiding working in fields when foliage is wet, as water splash is a primary mechanism of bacterial spread; (4) planting resistant cultivars if available; (5) sanitation of machinery and equipment; and (6) copper-based products may provide some protective benefit if applied preventatively, though they are not curative.",marks:10},
+    {q:"Compare vertical and horizontal transmission of plant viruses. Explain which type is more important for causing epidemics in the field and why both types must be considered in an integrated virus management program.",model:"Vertical transmission is the passage of virus from parent to offspring, occurring when the virus infects either the male gamete (pollen) or the female gamete (ovule), becoming incorporated into the seed. This results in seed-borne virus that infects the next generation of plants from germination. Horizontal transmission occurs between plants of the same generation and is assisted by vectors (aphids, thrips, nematodes, whiteflies), mechanical contact (rubbing of infected and healthy leaves), or vegetative propagation of infected material. Horizontal transmission is the primary driver of epidemics because it allows rapid spread through a crop during the growing season — a single infected plant can serve as a source for vector-mediated transmission to hundreds of neighbours. However, vertical transmission must also be addressed in management because seed-borne virus introduces primary inoculum into a new field or season, establishing initial infection foci from which horizontal spread then occurs. An integrated management program should therefore include: virus-free certified seed/planting material (addressing vertical transmission), vector management appropriate to the transmission mode (addressing horizontal transmission), resistant cultivars, removal of infected plants as inoculum sources, and biosecurity measures to prevent introduction of infected material.",marks:10}
+  ],
+  13: [
+    {q:"Explain the two-layered plant immune system (PTI and ETI). In your answer, describe what triggers each response, the relationship between them, and why some pathogens can still cause disease despite these defences.",model:"The first layer of plant immunity is PAMP-triggered immunity (PTI), activated when pattern recognition receptors on the plant cell surface detect conserved pathogen-associated molecular patterns (PAMPs/MAMPs) — these are molecules common to many microbes, such as flagellin or chitin, or damage-associated signals from the plant's own degraded cell wall. PTI provides a broad, non-specific defence response effective against many different pathogens. However, specialised pathogens have evolved effector proteins — small secreted molecules injected into plant cells that suppress or interfere with PTI signalling, allowing the pathogen to colonise the plant and cause disease. The second layer is effector-triggered immunity (ETI), which occurs when resistant plant cultivars possess intracellular recognition proteins (R proteins) that can detect specific pathogen effectors. If the effector is recognised, the plant mounts a stronger, more specific defence response, often including a hypersensitive response. PTI and ETI are not strictly separated — they can occur simultaneously, overlap in their mechanisms, and ETI is often described as an amplified version of PTI. Pathogens cause disease when they produce effectors that successfully suppress PTI and the plant lacks the corresponding R proteins to trigger ETI.",marks:10},
+    {q:"Compare the nutrient acquisition strategies of biotrophic, necrotrophic, and hemibiotrophic plant pathogens. Explain why the distinction between these lifestyles is important for selecting appropriate disease management strategies.",model:"Biotrophic pathogens (e.g., powdery mildews, rusts, viruses) feed exclusively on living tissue; they form specialised structures called haustoria that penetrate the cell wall but not the plasma membrane, absorbing nutrients from living cells without killing them. They produce minimal toxins and degradative enzymes to keep the host alive. Necrotrophic pathogens (e.g., Botrytis, soft rot bacteria) kill host cells first using toxins and cell wall-degrading enzymes (CAZymes), then feed on the dead tissue, causing extensive necrosis. Hemibiotrophic pathogens (e.g., Colletotrichum causing anthracnose) initially infect as biotrophs — sneaking in with minimal damage — before switching to a necrotrophic phase where they rapidly kill and consume tissue. This distinction is critical for management because: (1) plant resistance mechanisms differ — the hypersensitive response (killing plant cells) is effective against biotrophs but actually benefits necrotrophs; (2) biotrophic pathogens cause subtle early symptoms, making early detection difficult for hemibiotrophs that later switch to devastating necrotrophy; and (3) control timing differs — biotrophs must be prevented from establishing, while necrotrophs require protection of tissue integrity.",marks:10},
+    {q:"Describe the process of arbuscular mycorrhizal fungi (AMF) colonisation of a plant root, from initial signal exchange to arbuscule formation. Include the key structures and signalling events at each stage.",model:"AMF colonisation proceeds through several coordinated stages. Stage 1 (Signal exchange): A germinating AMF spore produces exploratory hyphae in the soil. The plant root releases exudates (strigolactones) that diffuse a short distance and stimulate AMF metabolism, causing the hyphae to branch extensively, increasing the probability of root contact. Upon contact, the AMF releases Myc factors that are perceived by the plant and activate the common symbiosis (SYM) pathway — a signal transduction cascade that prepares the plant for fungal colonisation. Stage 2 (Hyphopodium formation): The hyphal tip contacts the root epidermal cell surface, swells, flattens, and branches to form a hyphopodium that adheres tightly to the root surface via protrusions. The plant epidermal cell responds by forming a pre-penetration apparatus (PPA) — an aggregation of cytoplasm beneath the hyphopodium that defines a path for intracellular fungal growth. Stage 3 (Intracellular colonisation and arbuscule formation): The fungal hypha grows intracellularly, strictly following the PPA-defined pathway through the cell. Upon reaching the inner root cortex, the hypha branches repeatedly to form arbuscules — highly branched, tree-like structures that maximise surface area for nutrient exchange between the fungus and plant. The plasma membrane of the plant cell is not breached but invaginates around the arbuscule.",marks:10},
+    {q:"Explain the non-visual physiological changes that occur in plants during pathogen infection, including changes to photosynthesis, respiration, and canopy temperature. Why do these changes occur?",model:"When a plant is infected by a pathogen, several interconnected non-visual physiological changes occur even before visible symptoms appear. Photosynthesis decreases for multiple reasons: the pathogen may directly destroy chlorophyll; the plant may actively downregulate photosynthesis to redirect energy toward defence responses; or vascular pathogens may cause water stress by blocking xylem, leading to stomatal closure that reduces CO2 uptake. Respiration increases because the plant requires substantially more energy to mount its defence response — producing antimicrobial compounds, reactive oxygen species (for the oxidative burst/hypersensitive response), pathogenesis-related proteins, and reinforcing structural barriers. The oxidative burst itself consumes large amounts of oxygen. As a consequence of increased respiration and decreased transpiration (due to stomatal closure), canopy temperature rises — this is measurable with thermal imaging and is being explored as an early disease detection tool. These changes in primary metabolism represent a fundamental shift in the plant's resource allocation from growth and reproduction toward defence, explaining the yield losses associated with disease even before extensive visible tissue damage occurs.",marks:10},
+    {q:"Explain what is meant by a 'hypersensitive response' in plants. Under what circumstances is this response effective, and when might it actually worsen disease outcomes?",model:"The hypersensitive response (HR) is an induced plant defence mechanism in which the plant deliberately kills its own cells at and around the site of pathogen infection, creating a zone of dead tissue that deprives the pathogen of living cells and nutrients. This is often accompanied by a localised oxidative burst — production of reactive oxygen species (ROS) that are directly toxic to pathogen cells. The HR is highly effective against biotrophic pathogens such as viruses, powdery mildews, and rusts, because these obligate parasites can only survive on living tissue. By killing its own cells, the plant essentially starves the biotroph and confines it to a small necrotic lesion — visible as tiny pinprick spots on leaves in the case of virus-resistant plants. However, the HR can be counterproductive against necrotrophic pathogens, which thrive on dead tissue. By killing its own cells, the plant inadvertently provides exactly the substrate that necrotrophs need, potentially facilitating rather than restricting pathogen colonisation. This is why plants have evolved different defence signalling pathways for biotrophs versus necrotrophs, and why understanding pathogen lifestyle is essential for predicting whether a host resistance response will be protective or detrimental.",marks:10}
+  ],
+};
 
     // ==========================================
     // PLACEHOLDER COURSE DATA (replace with real data)
@@ -3945,7 +4538,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       progress: {},     // { "w1l1": "viewed" | "partial" | "complete" }
       theme: 'light',
       expandedWeeks: {},
-      expandedCards: {}
+      expandedCards: {},
+      saRatings: {},
+      examState: { active:false, config:{}, questions:[], answers:{}, currentQ:0, startTime:null, finished:false },
+      examHistory: [],
+      flashcardState: { mastery:{}, currentDeck:[], currentIndex:0, filter:'all', flipped:false, sessionStats:{known:0,learning:0} }
     };
 
     function loadState() {
@@ -4090,12 +4687,22 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         showDashboard();
         return;
       }
+      if (hash === 'exam') {
+        state.currentView = 'exam';
+        renderExam();
+        return;
+      }
+      if (hash === 'exam-results') {
+        state.currentView = 'exam-results';
+        renderExamResults();
+        return;
+      }
       const match = hash.match(/^week-(\d+)\/lecture-(\d+)\/?(.*)$/);
       if (match) {
         const wId = parseInt(match[1]);
         const lId = parseInt(match[2]);
         const tab = match[3] || 'learn';
-        if (['learn','terms','facts','quiz'].includes(tab)) {
+        if (['learn','terms','facts','quiz','flash'].includes(tab)) {
           state.currentTab = tab;
         }
         showLecture(wId, lId);
@@ -4179,57 +4786,159 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     function renderDashboard() {
       const area = document.getElementById('contentArea');
+      area.classList.add('dashboard-active');
       const p = getOverallProgress();
       const pct = p.totalQuizzes > 0 ? Math.round((p.perfectQuizzes / p.totalQuizzes) * 100) : 0;
-      const circumference = 2 * Math.PI * 54;
+      const ringR = 32;
+      const circumference = 2 * Math.PI * ringR;
       const offset = circumference - (pct / 100) * circumference;
 
+      // Week cards (compact)
       let weeksHTML = '';
       COURSE.weeks.forEach(w => {
         const wp = getWeekProgress(w);
         const wpct = wp.total > 0 ? Math.round((wp.completed / wp.total) * 100) : 0;
-        const quizDisplay = wp.quizTotal > 0 ? `<strong>${wp.quizCorrect}</strong> / ${wp.quizTotal} correct` : 'No quizzes yet';
-        weeksHTML += `
-          <div class="week-card" onclick="showLecture(${w.id}, ${w.lectures[0].id})">
-            <h3>${escapeHTML(w.title)}</h3>
-            <div class="week-card-meta">${w.lectures.length} lecture${w.lectures.length !== 1 ? 's' : ''}</div>
-            <div class="week-card-progress"><div class="week-card-progress-fill" style="width:${wpct}%"></div></div>
-            <div class="week-card-score">Quiz: ${quizDisplay}</div>
-          </div>`;
+        const quizDisplay = wp.quizTotal > 0 ? '<strong>' + wp.quizCorrect + '</strong>/' + wp.quizTotal : '--';
+        weeksHTML +=
+          '<div class="week-card" onclick="showLecture(' + w.id + ',' + w.lectures[0].id + ')">' +
+            '<h4>' + escapeHTML(w.title) + '</h4>' +
+            '<div class="week-card-progress"><div class="week-card-progress-fill" style="width:' + wpct + '%"></div></div>' +
+            '<div class="week-card-score">Quiz: ' + quizDisplay + '</div>' +
+          '</div>';
       });
 
       const viewedCount = Object.values(state.progress).filter(v => v).length;
 
-      area.innerHTML = `
-        <div class="dashboard-header">
-          <h2>Microbiology in Agriculture</h2>
-          <p>Your study dashboard -- track progress across all weeks and lectures.</p>
-        </div>
-        <div class="dashboard-overview">
-          <div class="progress-ring-container">
-            <svg width="130" height="130" viewBox="0 0 130 130">
-              <circle class="progress-ring-bg" cx="65" cy="65" r="54"/>
-              <circle class="progress-ring-fill" cx="65" cy="65" r="54"
-                stroke-dasharray="${circumference}"
-                stroke-dashoffset="${offset}"/>
-            </svg>
-            <div class="progress-ring-text">
-              <span class="pct">${pct}%</span>
-              <span class="label">Mastery</span>
-            </div>
-          </div>
-          <div class="overview-stats">
-            <h3>Overall Progress</h3>
-            <div class="stat-row">
-              <div class="stat-item"><span class="num">${p.totalLectures}</span><span class="desc">Lectures</span></div>
-              <div class="stat-item"><span class="num">${viewedCount}</span><span class="desc">Viewed</span></div>
-              <div class="stat-item"><span class="num">${p.completedLectures}</span><span class="desc">Mastered</span></div>
-              <div class="stat-item"><span class="num">${p.totalQuizzes}</span><span class="desc">Quizzes</span></div>
-            </div>
-          </div>
-        </div>
-        <h3 style="margin-bottom:16px;font-size:1.15rem;">Weekly Modules</h3>
-        <div class="week-cards-grid">${weeksHTML}</div>`;
+      // Weak areas (compact)
+      var weakAreas = analyzeWeakAreas();
+      var weakInnerHTML = '';
+      var weakLectures = weakAreas.filter(function(a) { return a.accuracy < 80 && a.totalCount > 0; });
+      var notAttempted = weakAreas.filter(function(a) { return a.totalCount === 0; });
+
+      if (weakLectures.length > 0 || notAttempted.length > 0) {
+        if (weakLectures.length > 0) {
+          weakLectures.forEach(function(w) {
+            var barColor = w.accuracy < 50 ? 'var(--error)' : 'var(--warning)';
+            weakInnerHTML += '<div class="weak-area-item">' +
+              '<div class="weak-area-info"><div class="weak-area-title">' + escapeHTML(w.title) + '</div>' +
+              '<div class="weak-area-meta">' + w.missedCount + ' missed / ' + w.totalCount + '</div></div>' +
+              '<div class="weak-area-bar"><div class="weak-area-bar-fill" style="width:' + Math.round(w.accuracy) + '%;background:' + barColor + '"></div></div>' +
+              '<button class="weak-area-btn" onclick="showLecture(' + w.weekId + ',' + w.lecId + ');setTab(\'quiz\')">Review</button>' +
+              '</div>';
+          });
+        }
+        if (notAttempted.length > 0) {
+          weakInnerHTML += '<div class="not-attempted-label">Not Yet Attempted</div>';
+          notAttempted.forEach(function(w) {
+            weakInnerHTML += '<div class="weak-area-item">' +
+              '<div class="weak-area-info"><div class="weak-area-title">' + escapeHTML(w.title) + '</div>' +
+              '<div class="weak-area-meta">No attempts</div></div>' +
+              '<button class="weak-area-btn" onclick="showLecture(' + w.weekId + ',' + w.lecId + ');setTab(\'quiz\')">Start</button>' +
+              '</div>';
+          });
+        }
+      } else {
+        weakInnerHTML = '<div class="dash-empty-state">' +
+          '<div class="empty-icon">&#9989;</div>' +
+          '<p>Complete some quizzes to see your weak areas here.</p>' +
+          '<div class="tip">Tip: Start with Week 1 and work through each lecture quiz.</div>' +
+          '</div>';
+      }
+
+      // Exam lecture checkboxes (hidden by default)
+      var examChecks = '';
+      COURSE.weeks.forEach(function(w) {
+        w.lectures.forEach(function(l) {
+          if (l.quiz && l.quiz.length > 0) {
+            examChecks += '<label class="exam-lecture-check"><input type="checkbox" class="exam-lec-cb" value="' + w.id + '-' + l.id + '" checked> ' + escapeHTML(l.title) + '</label>';
+          }
+        });
+      });
+
+      // Flashcard source options
+      var fcWeekOpts = '<option value="all">All Lectures</option>';
+      COURSE.weeks.forEach(function(w) {
+        fcWeekOpts += '<option value="' + w.id + '">' + escapeHTML(w.title) + '</option>';
+      });
+
+      area.innerHTML =
+        '<div class="dashboard-layout">' +
+
+        // === TOP ROW ===
+        '<div class="dashboard-top-row">' +
+        '<div class="dash-card dash-progress">' +
+          '<div class="progress-ring-container">' +
+            '<svg width="80" height="80" viewBox="0 0 80 80">' +
+              '<circle class="progress-ring-bg" cx="40" cy="40" r="' + ringR + '"/>' +
+              '<circle class="progress-ring-fill" cx="40" cy="40" r="' + ringR + '" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + offset + '"/>' +
+            '</svg>' +
+            '<div class="progress-ring-text">' +
+              '<span class="pct">' + pct + '%</span>' +
+              '<span class="label">Mastery</span>' +
+            '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="dash-title">Microbiology in Agriculture</div>' +
+            '<div class="dash-stats-grid">' +
+              '<div class="stat-item"><span class="num">' + p.totalLectures + '</span><span class="desc">Lectures</span></div>' +
+              '<div class="stat-item"><span class="num">' + viewedCount + '</span><span class="desc">Viewed</span></div>' +
+              '<div class="stat-item"><span class="num">' + p.completedLectures + '</span><span class="desc">Mastered</span></div>' +
+              '<div class="stat-item"><span class="num">' + p.totalQuizzes + '</span><span class="desc">Quizzes</span></div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        // === TOP CENTER: Mock Exam ===
+        '<div class="dash-card dash-exam">' +
+          '<h3>Mock Exam</h3>' +
+          '<div class="exam-quick-row">' +
+            '<div class="exam-quick-field">' +
+              '<label>Questions</label>' +
+              '<select id="examQCount"><option value="20">20</option><option value="30">30</option><option value="50">50</option><option value="all">All</option></select>' +
+            '</div>' +
+            '<div class="exam-quick-field">' +
+              '<label>Timer</label>' +
+              '<select id="examTimer"><option value="0">Off</option><option value="30">30s</option><option value="60">60s</option><option value="90">90s</option></select>' +
+            '</div>' +
+            '<button class="dash-exam-btn" onclick="startExam()">Start</button>' +
+          '</div>' +
+          '<span class="exam-customize-toggle" onclick="toggleExamCustomize()">Customize lectures...</span>' +
+          '<div class="exam-lecture-checks hidden" id="examCustomizePanel">' +
+            '<label class="exam-lecture-check" style="font-weight:700;"><input type="checkbox" id="examSelectAll" checked onchange="toggleExamSelectAll(this.checked)"> All</label>' +
+            examChecks +
+          '</div>' +
+        '</div>' +
+
+        // === TOP RIGHT: Flashcards ===
+        '<div class="dash-card dash-flashcards">' +
+          '<h3>Flashcards</h3>' +
+          '<div class="fc-quick-row">' +
+            '<div class="fc-quick-field">' +
+              '<label>Source</label>' +
+              '<select id="fcFilter">' + fcWeekOpts + '<option value="weak">Weak Only</option></select>' +
+            '</div>' +
+            '<div class="fc-quick-field">' +
+              '<label>Cards</label>' +
+              '<select id="fcCount"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="all">All</option></select>' +
+            '</div>' +
+            '<button class="dash-fc-btn" onclick="startFlashcardSession()">Start</button>' +
+          '</div>' +
+        '</div>' +
+        '</div>' + // close dashboard-top-row
+
+        // === BOTTOM LEFT: Week Cards ===
+        '<div class="dash-card dash-weeks">' +
+          '<h3>Weekly Modules</h3>' +
+          '<div class="week-cards-grid">' + weeksHTML + '</div>' +
+        '</div>' +
+
+        // === BOTTOM RIGHT: Weak Areas ===
+        '<div class="dash-card dash-weakareas">' +
+          '<h3>Weak Areas</h3>' +
+          weakInnerHTML +
+        '</div>' +
+
+        '</div>';
     }
 
     // ==========================================
@@ -4237,6 +4946,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     function renderLecture() {
       const area = document.getElementById('contentArea');
+      area.classList.remove('dashboard-active');
       const lec = getLecture(state.currentWeek, state.currentLecture);
       const week = getWeek(state.currentWeek);
 
@@ -4245,13 +4955,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         return;
       }
 
-      const tabs = ['learn', 'terms', 'facts', 'quiz'];
-      const tabLabels = { learn: 'Learn', terms: 'Terms', facts: 'Facts', quiz: 'Quiz' };
+      const tabs = ['learn', 'terms', 'facts', 'quiz', 'flash'];
+      const tabLabels = { learn: 'Learn', terms: 'Terms', facts: 'Facts', quiz: 'Quiz', flash: 'Flashcards' };
       const tabCounts = {
         learn: lec.explanations ? lec.explanations.length : 0,
         terms: lec.terms ? lec.terms.length : 0,
         facts: lec.facts ? lec.facts.length : 0,
-        quiz: lec.quiz ? lec.quiz.length : 0
+        quiz: lec.quiz ? lec.quiz.length : 0,
+        flash: lec.terms ? lec.terms.length : 0
       };
 
       let tabBarHTML = '<div class="tab-bar">';
@@ -4266,6 +4977,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         case 'terms': contentHTML = renderTermsTab(lec); break;
         case 'facts': contentHTML = renderFactsTab(lec); break;
         case 'quiz': contentHTML = renderQuizTab(lec); break;
+        case 'flash': contentHTML = renderFlashcardTab(lec); break;
       }
 
       area.innerHTML = `
@@ -4451,13 +5163,39 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           </div>`;
       });
 
-      return `
-        <div class="quiz-header">
-          <div class="quiz-score">Score: <span class="correct">${qs.score}</span> / <span class="total">${total}</span></div>
-          <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${progress}%"></div></div>
-          <button class="quiz-retry-btn" onclick="retryQuiz()">Retry</button>
-        </div>
-        ${questionsHTML}`;
+      var html = '<div class="quiz-header">' +
+        '<div class="quiz-score">Score: <span class="correct">' + qs.score + '</span> / <span class="total">' + total + '</span></div>' +
+        '<div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:' + progress + '%"></div></div>' +
+        '<button class="quiz-retry-btn" onclick="retryQuiz()">Retry</button>' +
+        '</div>' + questionsHTML;
+
+      // Short Answer Questions section
+      var saData = SHORT_ANSWERS[lec.id] || [];
+      if (saData.length > 0) {
+        html += '<div class="sa-section"><h3 class="sa-heading">Short Answer Questions</h3>';
+        saData.forEach(function(sa, idx) {
+          var saKey = lectureKey(state.currentWeek, state.currentLecture) + '_sa' + idx;
+          var rating = (state.saRatings && state.saRatings[saKey]) || '';
+          html += '<div class="sa-card">' +
+            '<div class="sa-marks">' + sa.marks + ' marks</div>' +
+            '<p class="sa-question">' + escapeHTML(sa.q) + '</p>' +
+            '<textarea class="sa-textarea" placeholder="Write your answer here..." rows="4"></textarea>' +
+            '<button class="sa-reveal-btn" onclick="toggleModelAnswer(' + idx + ')">Show Model Answer</button>' +
+            '<div class="sa-model" id="saModel-' + idx + '" style="display:none;">' +
+              '<strong>Model Answer:</strong><p>' + escapeHTML(sa.model) + '</p>' +
+              '<div class="sa-rating">' +
+                '<span>How did you do?</span>' +
+                '<button class="sa-rate-btn ' + (rating==='nailed' ? 'active green' : '') + '" onclick="rateSA(' + idx + ',\'nailed\')">Nailed it</button>' +
+                '<button class="sa-rate-btn ' + (rating==='partial' ? 'active yellow' : '') + '" onclick="rateSA(' + idx + ',\'partial\')">Partially correct</button>' +
+                '<button class="sa-rate-btn ' + (rating==='missed' ? 'active red' : '') + '" onclick="rateSA(' + idx + ',\'missed\')">Missed it</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        });
+        html += '</div>';
+      }
+
+      return html;
     }
 
     function answerQuiz(qIdx, optIdx) {
@@ -4792,6 +5530,789 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     // ==========================================
+    // FEATURE: SHORT ANSWER FUNCTIONS
+    // ==========================================
+    function toggleModelAnswer(idx) {
+      var el = document.getElementById('saModel-' + idx);
+      if (!el) return;
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    function rateSA(idx, rating) {
+      var saKey = lectureKey(state.currentWeek, state.currentLecture) + '_sa' + idx;
+      if (!state.saRatings) state.saRatings = {};
+      state.saRatings[saKey] = rating;
+      saveState();
+      // Update button styles immediately
+      var model = document.getElementById('saModel-' + idx);
+      if (model) {
+        var btns = model.querySelectorAll('.sa-rate-btn');
+        btns.forEach(function(btn) {
+          btn.classList.remove('active', 'green', 'yellow', 'red');
+        });
+        btns.forEach(function(btn) {
+          if (rating === 'nailed' && btn.textContent === 'Nailed it') { btn.classList.add('active', 'green'); }
+          if (rating === 'partial' && btn.textContent === 'Partially correct') { btn.classList.add('active', 'yellow'); }
+          if (rating === 'missed' && btn.textContent === 'Missed it') { btn.classList.add('active', 'red'); }
+        });
+      }
+    }
+
+    // ==========================================
+    // FEATURE: KEYBOARD SHORTCUTS
+    // ==========================================
+    function handleKeyboardShortcut(e) {
+      var tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      var key = e.key;
+
+      if (key === 'ArrowLeft') { e.preventDefault(); navigateLecture(-1); return; }
+      if (key === 'ArrowRight') { e.preventDefault(); navigateLecture(1); return; }
+
+      if (key === '1') { if (state.currentView === 'lecture') { setTab('learn'); } return; }
+      if (key === '2') { if (state.currentView === 'lecture') { setTab('terms'); } return; }
+      if (key === '3') { if (state.currentView === 'lecture') { setTab('facts'); } return; }
+      if (key === '4') { if (state.currentView === 'lecture') { setTab('quiz'); } return; }
+      if (key === '5') { if (state.currentView === 'lecture') { setTab('flash'); } return; }
+
+      if (key === ' ') {
+        e.preventDefault();
+        if (state.currentView === 'lecture' && state.currentTab === 'flash') {
+          flipFlashcard();
+        } else if (state.currentView === 'lecture' && state.currentTab === 'learn') {
+          // Toggle first non-expanded card or collapse all
+          var lec = getLecture(state.currentWeek, state.currentLecture);
+          if (lec && lec.explanations) {
+            var lecKey = lectureKey(state.currentWeek, state.currentLecture);
+            var expanded = state.expandedCards[lecKey] || {};
+            var foundClosed = false;
+            for (var i = 0; i < lec.explanations.length; i++) {
+              if (!expanded[i]) { toggleCard(i); foundClosed = true; break; }
+            }
+          }
+        }
+        return;
+      }
+
+      if (key === 's' || key === 'S') {
+        e.preventDefault();
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.focus();
+        return;
+      }
+
+      if (key === 'd' || key === 'D') { showDashboard(); return; }
+
+      if (key === '?') { toggleShortcutsHelp(); return; }
+
+      if (key === 'Escape') {
+        // Close any overlays
+        var overlay = document.getElementById('shortcutsOverlay');
+        if (overlay) overlay.remove();
+        var panel = document.getElementById('ttsPanel');
+        if (panel && panel.classList.contains('open')) panel.classList.remove('open');
+        return;
+      }
+    }
+
+    function navigateLecture(dir) {
+      var flatList = [];
+      COURSE.weeks.forEach(function(w) {
+        w.lectures.forEach(function(l) {
+          flatList.push({ weekId: w.id, lecId: l.id });
+        });
+      });
+      if (state.currentView !== 'lecture' || flatList.length === 0) return;
+
+      var currentIdx = -1;
+      for (var i = 0; i < flatList.length; i++) {
+        if (flatList[i].weekId === state.currentWeek && flatList[i].lecId === state.currentLecture) {
+          currentIdx = i;
+          break;
+        }
+      }
+      if (currentIdx === -1) return;
+
+      var newIdx = currentIdx + dir;
+      if (newIdx < 0) newIdx = flatList.length - 1;
+      if (newIdx >= flatList.length) newIdx = 0;
+
+      showLecture(flatList[newIdx].weekId, flatList[newIdx].lecId);
+    }
+
+    function toggleShortcutsHelp() {
+      var existing = document.getElementById('shortcutsOverlay');
+      if (existing) { existing.remove(); return; }
+
+      var shortcuts = [
+        ['Arrow Left / Right', 'Previous / Next lecture'],
+        ['1 / 2 / 3 / 4 / 5', 'Switch tab (Learn/Terms/Facts/Quiz/Flash)'],
+        ['Space', 'Toggle card or flip flashcard'],
+        ['S', 'Focus search'],
+        ['D', 'Go to dashboard'],
+        ['?', 'Show this help'],
+        ['Escape', 'Close overlays']
+      ];
+
+      var rowsHTML = '';
+      shortcuts.forEach(function(s) {
+        rowsHTML += '<div class="shortcut-row"><span>' + s[1] + '</span><span class="shortcut-key">' + s[0] + '</span></div>';
+      });
+
+      var overlay = document.createElement('div');
+      overlay.id = 'shortcutsOverlay';
+      overlay.className = 'shortcuts-overlay';
+      overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+      overlay.innerHTML = '<div class="shortcuts-card"><h3>Keyboard Shortcuts</h3>' + rowsHTML + '</div>';
+      document.body.appendChild(overlay);
+    }
+
+    // ==========================================
+    // FEATURE: WEAK AREAS ANALYSIS
+    // ==========================================
+    function analyzeWeakAreas() {
+      var results = [];
+      COURSE.weeks.forEach(function(w) {
+        w.lectures.forEach(function(l) {
+          if (!l.quiz || l.quiz.length === 0) return;
+          var key = lectureKey(w.id, l.id);
+          var qs = state.quizState[key];
+          var totalCount = l.quiz.length;
+          var missedCount = 0;
+          var answeredCount = 0;
+
+          if (qs && qs.answers) {
+            Object.keys(qs.answers).forEach(function(k) {
+              answeredCount++;
+              if (qs.answers[k] !== l.quiz[k].ans) {
+                missedCount++;
+              }
+            });
+          }
+
+          var accuracy = answeredCount > 0 ? ((answeredCount - missedCount) / answeredCount) * 100 : -1;
+
+          results.push({
+            weekId: w.id,
+            lecId: l.id,
+            title: l.title,
+            accuracy: accuracy === -1 ? 0 : accuracy,
+            missedCount: missedCount,
+            totalCount: answeredCount
+          });
+        });
+      });
+
+      // Sort by accuracy ascending (worst first)
+      results.sort(function(a, b) {
+        if (a.totalCount === 0 && b.totalCount === 0) return 0;
+        if (a.totalCount === 0) return 1;
+        if (b.totalCount === 0) return -1;
+        return a.accuracy - b.accuracy;
+      });
+
+      return results;
+    }
+
+    function startReviewQuiz() {
+      var missedQuestions = [];
+      COURSE.weeks.forEach(function(w) {
+        w.lectures.forEach(function(l) {
+          if (!l.quiz) return;
+          var key = lectureKey(w.id, l.id);
+          var qs = state.quizState[key];
+          if (!qs || !qs.answers) return;
+          l.quiz.forEach(function(q, idx) {
+            if (qs.answers[idx] !== undefined && qs.answers[idx] !== q.ans) {
+              missedQuestions.push({ q: q.q, opts: q.opts, ans: q.ans, exp: q.exp, source: l.title });
+            }
+          });
+        });
+      });
+
+      if (missedQuestions.length === 0) {
+        alert('No missed questions found. Great job!');
+        return;
+      }
+
+      // Shuffle
+      for (var i = missedQuestions.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = missedQuestions[i];
+        missedQuestions[i] = missedQuestions[j];
+        missedQuestions[j] = tmp;
+      }
+
+      state.examState = {
+        active: true,
+        config: { timer: 0, isReview: true },
+        questions: missedQuestions,
+        answers: {},
+        currentQ: 0,
+        startTime: Date.now(),
+        finished: false
+      };
+      saveState();
+      history.replaceState(null, '', '#exam');
+      state.currentView = 'exam';
+      renderExam();
+    }
+
+    // ==========================================
+    // FEATURE: PRACTICE EXAM MODE
+    // ==========================================
+    var examTimerInterval = null;
+    var examTimeLeft = 0;
+
+    function toggleExamSelectAll(checked) {
+      var cbs = document.querySelectorAll('.exam-lec-cb');
+      cbs.forEach(function(cb) { cb.checked = checked; });
+    }
+
+    function toggleExamCustomize() {
+      var panel = document.getElementById('examCustomizePanel');
+      if (panel) { panel.classList.toggle('hidden'); }
+    }
+
+    function startExam() {
+      var cbs = document.querySelectorAll('.exam-lec-cb:checked');
+      if (cbs.length === 0) { alert('Please select at least one lecture.'); return; }
+
+      var selectedPairs = [];
+      cbs.forEach(function(cb) {
+        var parts = cb.value.split('-');
+        selectedPairs.push({ weekId: parseInt(parts[0]), lecId: parseInt(parts[1]) });
+      });
+
+      var allQuestions = [];
+      selectedPairs.forEach(function(pair) {
+        var lec = getLecture(pair.weekId, pair.lecId);
+        if (lec && lec.quiz) {
+          lec.quiz.forEach(function(q) {
+            allQuestions.push({ q: q.q, opts: q.opts, ans: q.ans, exp: q.exp, source: lec.title });
+          });
+        }
+      });
+
+      if (allQuestions.length === 0) { alert('No questions found for selected lectures.'); return; }
+
+      // Shuffle
+      for (var i = allQuestions.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = allQuestions[i];
+        allQuestions[i] = allQuestions[j];
+        allQuestions[j] = tmp;
+      }
+
+      var qCountVal = document.getElementById('examQCount').value;
+      var count = qCountVal === 'all' ? allQuestions.length : Math.min(parseInt(qCountVal), allQuestions.length);
+      allQuestions = allQuestions.slice(0, count);
+
+      var timerVal = parseInt(document.getElementById('examTimer').value);
+
+      state.examState = {
+        active: true,
+        config: { timer: timerVal, isReview: false },
+        questions: allQuestions,
+        answers: {},
+        currentQ: 0,
+        startTime: Date.now(),
+        finished: false
+      };
+      saveState();
+      history.replaceState(null, '', '#exam');
+      state.currentView = 'exam';
+      renderExam();
+    }
+
+    function renderExam() {
+      var area = document.getElementById('contentArea');
+      area.classList.remove('dashboard-active');
+      var es = state.examState;
+
+      if (!es || !es.active) {
+        showDashboard();
+        return;
+      }
+
+      if (es.finished) {
+        renderExamResults();
+        return;
+      }
+
+      var total = es.questions.length;
+      var currentQ = es.currentQ;
+      var q = es.questions[currentQ];
+      var progress = total > 0 ? Math.round(((currentQ + 1) / total) * 100) : 0;
+      var selectedOpt = es.answers[currentQ];
+
+      var optsHTML = '';
+      q.opts.forEach(function(opt, oi) {
+        var selClass = selectedOpt === oi ? 'selected' : '';
+        optsHTML += '<button class="exam-option-btn ' + selClass + '" onclick="answerExam(' + currentQ + ',' + oi + ')">' + escapeHTML(opt) + '</button>';
+      });
+
+      var timerHTML = '';
+      if (es.config.timer > 0) {
+        timerHTML = '<div class="exam-timer" id="examTimer">--</div>';
+      }
+
+      var isLast = currentQ === total - 1;
+      var finishBtn = isLast ? '<button class="exam-finish-btn" onclick="finishExam()">Finish Exam</button>' : '';
+
+      area.innerHTML = '<div class="exam-container">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+          '<h2 style="font-size:1.3rem;">' + (es.config.isReview ? 'Review Quiz' : 'Mock Exam') + '</h2>' +
+          '<button class="exam-nav-btn" onclick="finishExam()" style="font-size:0.8rem;">End Early</button>' +
+        '</div>' +
+        '<div class="exam-progress">' +
+          '<div class="exam-progress-text">' + (currentQ + 1) + ' / ' + total + '</div>' +
+          '<div class="exam-progress-bar"><div class="exam-progress-fill" style="width:' + progress + '%"></div></div>' +
+          timerHTML +
+        '</div>' +
+        '<div class="exam-question-card">' +
+          '<div class="exam-q-num">Question ' + (currentQ + 1) + '</div>' +
+          '<div class="exam-q-text">' + escapeHTML(q.q) + '</div>' +
+          '<div class="exam-options">' + optsHTML + '</div>' +
+        '</div>' +
+        '<div class="exam-nav">' +
+          '<button class="exam-nav-btn" onclick="examNav(-1)"' + (currentQ === 0 ? ' disabled' : '') + '>Previous</button>' +
+          finishBtn +
+          '<button class="exam-nav-btn primary" onclick="examNav(1)"' + (isLast ? ' disabled' : '') + '>Next</button>' +
+        '</div>' +
+        '</div>';
+
+      // Start timer if needed
+      if (es.config.timer > 0) {
+        clearInterval(examTimerInterval);
+        examTimeLeft = es.config.timer;
+        updateExamTimerDisplay();
+        examTimerInterval = setInterval(function() {
+          examTimeLeft--;
+          updateExamTimerDisplay();
+          if (examTimeLeft <= 0) {
+            clearInterval(examTimerInterval);
+            // Auto-advance
+            if (es.currentQ < es.questions.length - 1) {
+              examNav(1);
+            } else {
+              finishExam();
+            }
+          }
+        }, 1000);
+      }
+
+      updateSidebarActive();
+    }
+
+    function updateExamTimerDisplay() {
+      var el = document.getElementById('examTimer');
+      if (!el) return;
+      var m = Math.floor(examTimeLeft / 60);
+      var s = examTimeLeft % 60;
+      el.textContent = (m > 0 ? m + ':' : '') + (s < 10 ? '0' : '') + s;
+      if (examTimeLeft <= 10) el.style.color = 'var(--error)';
+    }
+
+    function answerExam(qIdx, optIdx) {
+      state.examState.answers[qIdx] = optIdx;
+      saveState();
+      // Update button styles
+      var btns = document.querySelectorAll('.exam-option-btn');
+      btns.forEach(function(btn, i) {
+        btn.classList.toggle('selected', i === optIdx);
+      });
+    }
+
+    function examNav(dir) {
+      clearInterval(examTimerInterval);
+      var es = state.examState;
+      var newQ = es.currentQ + dir;
+      if (newQ < 0 || newQ >= es.questions.length) return;
+      es.currentQ = newQ;
+      saveState();
+      renderExam();
+    }
+
+    function finishExam() {
+      clearInterval(examTimerInterval);
+      var es = state.examState;
+      es.finished = true;
+
+      // Calculate score
+      var correct = 0;
+      es.questions.forEach(function(q, idx) {
+        if (es.answers[idx] === q.ans) correct++;
+      });
+
+      var result = {
+        date: Date.now(),
+        totalQuestions: es.questions.length,
+        correct: correct,
+        timeTaken: Date.now() - es.startTime,
+        isReview: es.config.isReview || false
+      };
+
+      if (!state.examHistory) state.examHistory = [];
+      state.examHistory.push(result);
+      saveState();
+      history.replaceState(null, '', '#exam-results');
+      state.currentView = 'exam-results';
+      renderExamResults();
+    }
+
+    function renderExamResults() {
+      var area = document.getElementById('contentArea');
+      var es = state.examState;
+
+      if (!es || !es.questions || es.questions.length === 0) {
+        showDashboard();
+        return;
+      }
+
+      var total = es.questions.length;
+      var correct = 0;
+      es.questions.forEach(function(q, idx) {
+        if (es.answers[idx] === q.ans) correct++;
+      });
+      var pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+      var circumference = 2 * Math.PI * 54;
+      var offset = circumference - (pct / 100) * circumference;
+      var ringColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--error)';
+
+      // Per-source breakdown
+      var bySource = {};
+      es.questions.forEach(function(q, idx) {
+        var src = q.source || 'Unknown';
+        if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+        bySource[src].total++;
+        if (es.answers[idx] === q.ans) bySource[src].correct++;
+      });
+
+      var tableHTML = '<table class="exam-results-table"><thead><tr><th>Lecture</th><th>Correct</th><th>Accuracy</th></tr></thead><tbody>';
+      Object.keys(bySource).forEach(function(src) {
+        var s = bySource[src];
+        var acc = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0;
+        tableHTML += '<tr><td>' + escapeHTML(src) + '</td><td>' + s.correct + ' / ' + s.total + '</td><td>' + acc + '%</td></tr>';
+      });
+      tableHTML += '</tbody></table>';
+
+      // Review mistakes
+      var reviewHTML = '';
+      es.questions.forEach(function(q, idx) {
+        var userAns = es.answers[idx];
+        var isCorrect = userAns === q.ans;
+        if (!isCorrect) {
+          reviewHTML += '<div class="exam-review-card review-wrong">' +
+            '<div class="exam-q-num" style="color:var(--error);">Missed</div>' +
+            '<div class="exam-q-text" style="font-size:0.95rem;">' + escapeHTML(q.q) + '</div>' +
+            '<p style="font-size:0.85rem;margin-top:8px;"><strong style="color:var(--error);">Your answer:</strong> ' + (userAns !== undefined ? escapeHTML(q.opts[userAns]) : 'No answer') + '</p>' +
+            '<p style="font-size:0.85rem;margin-top:4px;"><strong style="color:var(--success);">Correct:</strong> ' + escapeHTML(q.opts[q.ans]) + '</p>' +
+            '<p style="font-size:0.85rem;margin-top:6px;color:var(--text-light);">' + escapeHTML(q.exp) + '</p>' +
+            '</div>';
+        }
+      });
+
+      area.innerHTML = '<div class="exam-results">' +
+        '<h2>' + (es.config.isReview ? 'Review Quiz Results' : 'Exam Results') + '</h2>' +
+        '<p style="color:var(--text-light);margin-bottom:20px;">You scored ' + correct + ' out of ' + total + '</p>' +
+        '<div class="exam-score-ring">' +
+          '<svg width="130" height="130" viewBox="0 0 130 130" style="transform:rotate(-90deg);">' +
+            '<circle cx="65" cy="65" r="54" fill="none" stroke="var(--border)" stroke-width="8"/>' +
+            '<circle cx="65" cy="65" r="54" fill="none" stroke="' + ringColor + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + circumference + '" stroke-dashoffset="' + offset + '"/>' +
+          '</svg>' +
+          '<div style="margin-top:-95px;margin-bottom:30px;"><span style="font-size:1.6rem;font-weight:700;color:' + ringColor + ';">' + pct + '%</span></div>' +
+        '</div>' +
+        tableHTML +
+        (reviewHTML ? '<h3 style="text-align:left;margin:24px 0 16px;font-size:1.1rem;">Review Mistakes</h3>' + reviewHTML : '') +
+        '<div style="margin-top:24px;">' +
+          '<button class="exam-start-btn" onclick="showDashboard()">Back to Dashboard</button>' +
+        '</div>' +
+        '</div>';
+
+      updateSidebarActive();
+    }
+
+    // ==========================================
+    // FEATURE: FLASHCARD MODE
+    // ==========================================
+    function buildFlashcardDeck(filter, count) {
+      var cards = [];
+      var mastery = state.flashcardState.mastery || {};
+
+      if (filter === 'weak') {
+        // Only cards marked as 'learning' or never seen
+        COURSE.weeks.forEach(function(w) {
+          w.lectures.forEach(function(l) {
+            if (!l.terms) return;
+            l.terms.forEach(function(t) {
+              var mKey = t.term;
+              var m = mastery[mKey] || 0;
+              if (m < 2) {
+                cards.push({ term: t.term, def: t.def, source: l.title, mastery: m });
+              }
+            });
+          });
+        });
+      } else if (filter === 'all') {
+        COURSE.weeks.forEach(function(w) {
+          w.lectures.forEach(function(l) {
+            if (!l.terms) return;
+            l.terms.forEach(function(t) {
+              var mKey = t.term;
+              cards.push({ term: t.term, def: t.def, source: l.title, mastery: mastery[mKey] || 0 });
+            });
+          });
+        });
+      } else {
+        // Filter by week id
+        var weekId = parseInt(filter);
+        var week = getWeek(weekId);
+        if (week) {
+          week.lectures.forEach(function(l) {
+            if (!l.terms) return;
+            l.terms.forEach(function(t) {
+              var mKey = t.term;
+              cards.push({ term: t.term, def: t.def, source: l.title, mastery: mastery[mKey] || 0 });
+            });
+          });
+        }
+      }
+
+      // Sort by mastery priority (lowest first)
+      cards.sort(function(a, b) { return a.mastery - b.mastery; });
+
+      // Trim to count
+      if (count !== 'all' && count < cards.length) {
+        cards = cards.slice(0, count);
+      }
+
+      // Shuffle
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = cards[i];
+        cards[i] = cards[j];
+        cards[j] = tmp;
+      }
+
+      return cards;
+    }
+
+    function startFlashcardSession() {
+      var filterEl = document.getElementById('fcFilter');
+      var countEl = document.getElementById('fcCount');
+      var filter = filterEl ? filterEl.value : 'all';
+      var countVal = countEl ? countEl.value : '25';
+      var count = countVal === 'all' ? 'all' : parseInt(countVal);
+
+      var deck = buildFlashcardDeck(filter, count);
+      if (deck.length === 0) { alert('No flashcards available for this selection.'); return; }
+
+      state.flashcardState.currentDeck = deck;
+      state.flashcardState.currentIndex = 0;
+      state.flashcardState.flipped = false;
+      state.flashcardState.filter = filter;
+      state.flashcardState.sessionStats = { known: 0, learning: 0 };
+      saveState();
+
+      state.currentView = 'flashcard-session';
+      renderFlashcards();
+    }
+
+    function startFlashcardTabSession(lec) {
+      var cards = [];
+      var mastery = state.flashcardState.mastery || {};
+      if (lec.terms) {
+        lec.terms.forEach(function(t) {
+          cards.push({ term: t.term, def: t.def, source: lec.title, mastery: mastery[t.term] || 0 });
+        });
+      }
+      if (cards.length === 0) return;
+
+      // Shuffle
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = cards[i];
+        cards[i] = cards[j];
+        cards[j] = tmp;
+      }
+
+      state.flashcardState.currentDeck = cards;
+      state.flashcardState.currentIndex = 0;
+      state.flashcardState.flipped = false;
+      state.flashcardState.sessionStats = { known: 0, learning: 0 };
+      saveState();
+    }
+
+    function renderFlashcardTab(lec) {
+      if (!lec.terms || lec.terms.length === 0) {
+        return '<p style="color:var(--text-light);">No flashcards available yet.</p>';
+      }
+
+      var fc = state.flashcardState;
+      // Start a session for this lecture if not already active or if deck is empty
+      if (!fc.currentDeck || fc.currentDeck.length === 0 || fc.currentDeck[0].source !== lec.title) {
+        startFlashcardTabSession(lec);
+        fc = state.flashcardState;
+      }
+
+      var deck = fc.currentDeck;
+      var idx = fc.currentIndex;
+
+      if (idx >= deck.length) {
+        // Session complete
+        var stats = fc.sessionStats || { known: 0, learning: 0 };
+        return '<div class="flashcard-summary">' +
+          '<h3>Session Complete!</h3>' +
+          '<div class="fc-stats">' +
+            '<div class="fc-stat"><div class="num" style="color:var(--success);">' + stats.known + '</div><div class="desc">Known</div></div>' +
+            '<div class="fc-stat"><div class="num" style="color:var(--warning);">' + stats.learning + '</div><div class="desc">Learning</div></div>' +
+          '</div>' +
+          '<button class="exam-start-btn" style="margin-top:16px;" onclick="resetFlashcardTab()">Start Over</button>' +
+          '</div>';
+      }
+
+      var card = deck[idx];
+      var flippedClass = fc.flipped ? 'flipped' : '';
+
+      return '<div class="flashcard-progress">' + (idx + 1) + ' / ' + deck.length + '</div>' +
+        '<div class="flashcard-container">' +
+          '<div class="flashcard ' + flippedClass + '" onclick="flipFlashcard()">' +
+            '<div class="flashcard-front"><div class="fc-label">Term</div><div class="fc-term">' + escapeHTML(card.term) + '</div></div>' +
+            '<div class="flashcard-back"><div class="fc-label">Definition</div><div class="fc-def">' + escapeHTML(card.def) + '</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="flashcard-controls">' +
+          '<button class="fc-btn flip" onclick="flipFlashcard()">Flip</button>' +
+          '<button class="fc-btn known" onclick="markCardKnown()">Known</button>' +
+          '<button class="fc-btn learning" onclick="markCardLearning()">Learning</button>' +
+        '</div>';
+    }
+
+    function resetFlashcardTab() {
+      state.flashcardState.currentDeck = [];
+      state.flashcardState.currentIndex = 0;
+      state.flashcardState.flipped = false;
+      state.flashcardState.sessionStats = { known: 0, learning: 0 };
+      saveState();
+      renderLecture();
+    }
+
+    function renderFlashcards() {
+      var area = document.getElementById('contentArea');
+      area.classList.remove('dashboard-active');
+      var fc = state.flashcardState;
+      var deck = fc.currentDeck;
+      var idx = fc.currentIndex;
+
+      if (!deck || deck.length === 0) {
+        showDashboard();
+        return;
+      }
+
+      if (idx >= deck.length) {
+        renderFlashcardSummary();
+        return;
+      }
+
+      var card = deck[idx];
+      var flippedClass = fc.flipped ? 'flipped' : '';
+
+      area.innerHTML = '<div style="max-width:600px;margin:0 auto;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+          '<h2 style="font-size:1.3rem;">Flashcards</h2>' +
+          '<button class="exam-nav-btn" onclick="showDashboard()">Exit</button>' +
+        '</div>' +
+        '<div class="flashcard-progress">' + (idx + 1) + ' / ' + deck.length + '</div>' +
+        '<div class="flashcard-container">' +
+          '<div class="flashcard ' + flippedClass + '" onclick="flipFlashcard()">' +
+            '<div class="flashcard-front"><div class="fc-label">Term</div><div class="fc-term">' + escapeHTML(card.term) + '</div></div>' +
+            '<div class="flashcard-back"><div class="fc-label">Definition</div><div class="fc-def">' + escapeHTML(card.def) + '</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="flashcard-controls">' +
+          '<button class="fc-btn flip" onclick="flipFlashcard()">Flip</button>' +
+          '<button class="fc-btn known" onclick="markCardKnown()">Known</button>' +
+          '<button class="fc-btn learning" onclick="markCardLearning()">Learning</button>' +
+        '</div>' +
+        '</div>';
+    }
+
+    function flipFlashcard() {
+      state.flashcardState.flipped = !state.flashcardState.flipped;
+      // Update DOM directly for smooth animation
+      var card = document.querySelector('.flashcard');
+      if (card) {
+        card.classList.toggle('flipped', state.flashcardState.flipped);
+      }
+    }
+
+    function markCardKnown() {
+      var fc = state.flashcardState;
+      var deck = fc.currentDeck;
+      if (!deck || fc.currentIndex >= deck.length) return;
+
+      var card = deck[fc.currentIndex];
+      if (!fc.mastery) fc.mastery = {};
+      fc.mastery[card.term] = (fc.mastery[card.term] || 0) + 1;
+      fc.sessionStats.known++;
+      fc.currentIndex++;
+      fc.flipped = false;
+      saveState();
+
+      if (state.currentView === 'flashcard-session') {
+        renderFlashcards();
+      } else {
+        renderLecture();
+      }
+    }
+
+    function markCardLearning() {
+      var fc = state.flashcardState;
+      var deck = fc.currentDeck;
+      if (!deck || fc.currentIndex >= deck.length) return;
+
+      var card = deck[fc.currentIndex];
+      if (!fc.mastery) fc.mastery = {};
+      fc.mastery[card.term] = Math.max(0, (fc.mastery[card.term] || 0) - 1);
+      fc.sessionStats.learning++;
+
+      // Move card to back of deck
+      var removed = deck.splice(fc.currentIndex, 1)[0];
+      deck.push(removed);
+      fc.flipped = false;
+      saveState();
+
+      if (state.currentView === 'flashcard-session') {
+        renderFlashcards();
+      } else {
+        renderLecture();
+      }
+    }
+
+    function renderFlashcardSummary() {
+      var area = document.getElementById('contentArea');
+      area.classList.remove('dashboard-active');
+      var stats = state.flashcardState.sessionStats || { known: 0, learning: 0 };
+
+      area.innerHTML = '<div class="flashcard-summary">' +
+        '<h3>Session Complete!</h3>' +
+        '<p style="color:var(--text-light);margin-bottom:12px;">Great work reviewing your flashcards.</p>' +
+        '<div class="fc-stats">' +
+          '<div class="fc-stat"><div class="num" style="color:var(--success);">' + stats.known + '</div><div class="desc">Known</div></div>' +
+          '<div class="fc-stat"><div class="num" style="color:var(--warning);">' + stats.learning + '</div><div class="desc">Learning</div></div>' +
+        '</div>' +
+        '<button class="exam-start-btn" style="margin-top:24px;" onclick="showDashboard()">Back to Dashboard</button>' +
+        '</div>';
+    }
+
+    // ==========================================
     // INITIALIZATION
     // ==========================================
     function init() {
@@ -4807,6 +6328,9 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       buildSidebar();
       initSearch();
       initVoiceTester();
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', handleKeyboardShortcut);
 
       // Close TTS panel when clicking outside of it
       document.addEventListener('click', function(e) {
@@ -4830,8 +6354,282 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       window.addEventListener('hashchange', parseHash);
     }
 
+    // ==========================================
+    // POMODORO TIMER
+    // ==========================================
+    var pomo = {
+      running: false,
+      phase: 'work',
+      workMins: parseInt(localStorage.getItem('pomo-work') || '25'),
+      breakMins: parseInt(localStorage.getItem('pomo-break') || '5'),
+      longBreakMins: parseInt(localStorage.getItem('pomo-long') || '15'),
+      longBreakEvery: parseInt(localStorage.getItem('pomo-longEvery') || '4'),
+      secondsLeft: parseInt(localStorage.getItem('pomo-work') || '25') * 60,
+      totalSeconds: parseInt(localStorage.getItem('pomo-work') || '25') * 60,
+      session: 1,
+      interval: null,
+      settingsOpen: false,
+      overlayActive: false,
+      overlayInterval: null,
+      overlaySecondsLeft: 0,
+      overlayTotalSeconds: 0,
+    };
+
+    function fmtTime(s) {
+      var m = Math.floor(s / 60);
+      var ss = s % 60;
+      return m + ':' + (ss < 10 ? '0' : '') + ss;
+    }
+
+    function renderPomodoro() {
+      var el = document.getElementById('pomoWidget');
+      if (!el) return;
+      var r = 18;
+      var circ = 2 * Math.PI * r;
+      var pct = pomo.totalSeconds > 0 ? pomo.secondsLeft / pomo.totalSeconds : 0;
+      var offset = circ * (1 - pct);
+      var phaseClass = pomo.phase === 'work' ? 'work' : 'break';
+      var phaseLabel = pomo.phase === 'work' ? 'Focus' : (pomo.session % pomo.longBreakEvery === 0 && pomo.phase === 'break' ? 'Long Break' : 'Break');
+
+      var playIcon = pomo.running
+        ? '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>';
+
+      el.innerHTML =
+        '<div class="pomo-ring">' +
+          '<svg width="100%" height="100%" viewBox="0 0 44 44">' +
+            '<circle class="pomo-ring-bg" cx="22" cy="22" r="' + r + '"/>' +
+            '<circle class="pomo-ring-fill ' + phaseClass + '" cx="22" cy="22" r="' + r + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"/>' +
+          '</svg>' +
+          '<div class="pomo-time">' + fmtTime(pomo.secondsLeft) + '</div>' +
+        '</div>' +
+        '<div class="pomo-label">' +
+          '<span class="pomo-phase">' + phaseLabel + '</span>' +
+          '<span class="pomo-session">Session #' + pomo.session + '</span>' +
+        '</div>' +
+        '<div class="pomo-controls">' +
+          '<button class="pomo-btn" onclick="togglePomo()" title="' + (pomo.running ? 'Pause' : 'Start') + '">' + playIcon + '</button>' +
+          '<button class="pomo-btn" onclick="resetPomo()" title="Reset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>' +
+          '<button class="pomo-btn" onclick="skipPomo()" title="Skip"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,4 15,12 5,20"/><rect x="15" y="4" width="4" height="16" rx="1"/></svg></button>' +
+        '</div>' +
+        '<button class="pomo-settings-btn" onclick="togglePomoSettings()">Settings</button>' +
+        '<div class="pomo-settings' + (pomo.settingsOpen ? ' open' : '') + '" id="pomoSettings">' +
+          '<div class="pomo-setting-row"><span>Focus (min)</span><input type="number" id="pomoWorkInput" value="' + pomo.workMins + '" min="1" max="90"></div>' +
+          '<div class="pomo-setting-row"><span>Break (min)</span><input type="number" id="pomoBreakInput" value="' + pomo.breakMins + '" min="1" max="30"></div>' +
+          '<div class="pomo-setting-row"><span>Long break (min)</span><input type="number" id="pomoLongInput" value="' + pomo.longBreakMins + '" min="1" max="60"></div>' +
+          '<div class="pomo-setting-row"><span>Long break every</span><input type="number" id="pomoLongEveryInput" value="' + pomo.longBreakEvery + '" min="2" max="10"></div>' +
+          '<button class="pomo-save-btn" onclick="savePomoSettings()">Save</button>' +
+        '</div>';
+    }
+
+    function togglePomoSettings() {
+      pomo.settingsOpen = !pomo.settingsOpen;
+      var el = document.getElementById('pomoSettings');
+      if (el) el.classList.toggle('open', pomo.settingsOpen);
+    }
+
+    function savePomoSettings() {
+      var w = parseInt(document.getElementById('pomoWorkInput').value) || 25;
+      var b = parseInt(document.getElementById('pomoBreakInput').value) || 5;
+      var l = parseInt(document.getElementById('pomoLongInput').value) || 15;
+      var le = parseInt(document.getElementById('pomoLongEveryInput').value) || 4;
+      w = Math.max(1, Math.min(90, w));
+      b = Math.max(1, Math.min(30, b));
+      l = Math.max(1, Math.min(60, l));
+      le = Math.max(2, Math.min(10, le));
+      pomo.workMins = w; pomo.breakMins = b; pomo.longBreakMins = l; pomo.longBreakEvery = le;
+      localStorage.setItem('pomo-work', w);
+      localStorage.setItem('pomo-break', b);
+      localStorage.setItem('pomo-long', l);
+      localStorage.setItem('pomo-longEvery', le);
+      pomo.settingsOpen = false;
+      resetPomo();
+    }
+
+    function togglePomo() {
+      if (pomo.running) {
+        clearInterval(pomo.interval);
+        pomo.running = false;
+      } else {
+        pomo.running = true;
+        pomo.interval = setInterval(pomoTick, 1000);
+      }
+      renderPomodoro();
+    }
+
+    function pomoTick() {
+      if (pomo.secondsLeft <= 0) {
+        clearInterval(pomo.interval);
+        pomo.running = false;
+        showPomoOverlay();
+        renderPomodoro();
+        return;
+      }
+      pomo.secondsLeft--;
+      renderPomodoro();
+    }
+
+    function resetPomo() {
+      clearInterval(pomo.interval);
+      pomo.running = false;
+      pomo.phase = 'work';
+      pomo.secondsLeft = pomo.workMins * 60;
+      pomo.totalSeconds = pomo.secondsLeft;
+      renderPomodoro();
+    }
+
+    function skipPomo() {
+      clearInterval(pomo.interval);
+      pomo.running = false;
+      pomo.secondsLeft = 0;
+      showPomoOverlay();
+      renderPomodoro();
+    }
+
+    // Full-screen overlay
+    function showPomoOverlay() {
+      // Play alarm sound
+      pomoAlarmStart();
+
+      var isWorkDone = pomo.phase === 'work';
+      var isLong = pomo.session % pomo.longBreakEvery === 0;
+      var nextPhase = isWorkDone ? (isLong ? 'Long Break' : 'Break') : 'Focus';
+      var nextDuration = isWorkDone ? (isLong ? pomo.longBreakMins : pomo.breakMins) : pomo.workMins;
+
+      pomo.overlayActive = true;
+      pomo.overlaySecondsLeft = nextDuration * 60;
+      pomo.overlayTotalSeconds = nextDuration * 60;
+
+      var overlay = document.createElement('div');
+      overlay.id = 'pomoOverlay';
+      overlay.className = 'pomo-overlay ' + (isWorkDone ? 'work-done' : 'break-done');
+      document.body.appendChild(overlay);
+
+      renderPomoOverlay(overlay, isWorkDone, nextPhase, nextDuration);
+
+      // Start the break/focus countdown on the overlay
+      pomo.overlayInterval = setInterval(function() {
+        pomo.overlaySecondsLeft--;
+        if (pomo.overlaySecondsLeft <= 0) {
+          clearInterval(pomo.overlayInterval);
+          // Enable dismiss
+          var btn = document.getElementById('pomoDismissBtn');
+          if (btn) btn.classList.add('show');
+          var cd = document.getElementById('pomoOverlayCountdown');
+          if (cd) cd.textContent = 'Timer complete! You may continue.';
+        }
+        renderPomoOverlay(overlay, isWorkDone, nextPhase, nextDuration);
+      }, 1000);
+    }
+
+    function renderPomoOverlay(overlay, isWorkDone, nextPhase, nextDuration) {
+      var r = 68;
+      var circ = 2 * Math.PI * r;
+      var pct = pomo.overlayTotalSeconds > 0 ? pomo.overlaySecondsLeft / pomo.overlayTotalSeconds : 0;
+      var offset = circ * (1 - pct);
+      var canDismiss = pomo.overlaySecondsLeft <= 0;
+
+      var title = isWorkDone ? 'Great work! Take a break.' : 'Break is over! Time to focus.';
+      var msg = isWorkDone
+        ? 'You completed session #' + pomo.session + '. Step away, stretch, rest your eyes.'
+        : 'Your break is done. Let\'s get back to studying!';
+
+      overlay.innerHTML =
+        '<div class="pomo-overlay-ring">' +
+          '<svg width="100%" height="100%" viewBox="0 0 160 160">' +
+            '<circle class="ring-bg" cx="80" cy="80" r="' + r + '"/>' +
+            '<circle class="ring-fill" cx="80" cy="80" r="' + r + '" stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"/>' +
+          '</svg>' +
+          '<div class="pomo-overlay-time">' + fmtTime(pomo.overlaySecondsLeft) + '</div>' +
+        '</div>' +
+        '<div class="pomo-overlay-title">' + title + '</div>' +
+        '<div class="pomo-overlay-msg">' + msg + '</div>' +
+        '<div class="pomo-overlay-countdown" id="pomoOverlayCountdown">' +
+          (canDismiss ? 'Timer complete! You may continue.' : nextPhase + ' timer: ' + fmtTime(pomo.overlaySecondsLeft) + ' remaining') +
+        '</div>' +
+        '<button class="pomo-overlay-dismiss ' + (canDismiss ? 'show' : '') + '" id="pomoDismissBtn" onclick="dismissPomoOverlay()">Continue Studying</button>';
+    }
+
+    function dismissPomoOverlay() {
+      pomoAlarmStop();
+      clearInterval(pomo.overlayInterval);
+      pomo.overlayActive = false;
+      var overlay = document.getElementById('pomoOverlay');
+      if (overlay) overlay.remove();
+
+      // Switch to next phase
+      if (pomo.phase === 'work') {
+        pomo.phase = 'break';
+        var isLong = pomo.session % pomo.longBreakEvery === 0;
+        pomo.secondsLeft = (isLong ? pomo.longBreakMins : pomo.breakMins) * 60;
+        pomo.totalSeconds = pomo.secondsLeft;
+      } else {
+        pomo.phase = 'work';
+        pomo.session++;
+        pomo.secondsLeft = pomo.workMins * 60;
+        pomo.totalSeconds = pomo.secondsLeft;
+      }
+      renderPomodoro();
+      // Auto-start next phase
+      togglePomo();
+    }
+
+    // Alarm sound (repeating gentle chime)
+    var pomoAlarmCtx = null;
+    var pomoAlarmInterval = null;
+
+    function pomoAlarmStart() {
+      try {
+        pomoAlarmCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function chime() {
+          if (!pomoAlarmCtx) return;
+          var osc = pomoAlarmCtx.createOscillator();
+          var gain = pomoAlarmCtx.createGain();
+          osc.connect(gain); gain.connect(pomoAlarmCtx.destination);
+          osc.frequency.value = 880;
+          gain.gain.value = 0.2;
+          osc.start();
+          gain.gain.exponentialRampToValueAtTime(0.01, pomoAlarmCtx.currentTime + 0.5);
+          osc.stop(pomoAlarmCtx.currentTime + 0.5);
+          setTimeout(function() {
+            if (!pomoAlarmCtx) return;
+            var osc2 = pomoAlarmCtx.createOscillator();
+            var gain2 = pomoAlarmCtx.createGain();
+            osc2.connect(gain2); gain2.connect(pomoAlarmCtx.destination);
+            osc2.frequency.value = 1100;
+            gain2.gain.value = 0.2;
+            osc2.start();
+            gain2.gain.exponentialRampToValueAtTime(0.01, pomoAlarmCtx.currentTime + 0.5);
+            osc2.stop(pomoAlarmCtx.currentTime + 0.5);
+          }, 300);
+        }
+        chime();
+        pomoAlarmInterval = setInterval(chime, 3000);
+      } catch(e) {}
+
+      if (Notification && Notification.permission === 'granted') {
+        var msg = pomo.phase === 'work' ? 'Focus session done! Time for a break.' : 'Break over! Ready to focus?';
+        new Notification('Pomodoro Timer', { body: msg });
+      }
+    }
+
+    function pomoAlarmStop() {
+      if (pomoAlarmInterval) { clearInterval(pomoAlarmInterval); pomoAlarmInterval = null; }
+      if (pomoAlarmCtx) { try { pomoAlarmCtx.close(); } catch(e) {} pomoAlarmCtx = null; }
+    }
+
+    function initPomodoro() {
+      renderPomodoro();
+      if (Notification && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
     // Start the app
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      initPomodoro();
+    });
   </script>
 </body>
 </html>

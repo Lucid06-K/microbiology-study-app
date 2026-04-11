@@ -4787,21 +4787,32 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     const STORAGE_KEY = 'microStudyState';
 
-    let state = {
-      currentView: 'dashboard',
-      currentWeek: null,
-      currentLecture: null,
-      currentTab: 'learn',
-      quizState: {},    // { "w1l1": { answers: {0: 2, 1: 1}, score: 1 } }
-      progress: {},     // { "w1l1": "viewed" | "partial" | "complete" }
-      theme: 'light',
-      expandedWeeks: {},
-      expandedCards: {},
-      saRatings: {},
-      examState: { active:false, config:{}, questions:[], answers:{}, currentQ:0, startTime:null, finished:false },
-      examHistory: [],
-      flashcardState: { mastery:{}, currentDeck:[], currentIndex:0, filter:'all', flipped:false, sessionStats:{known:0,learning:0} }
-    };
+    function getDefaultState() {
+      return {
+        currentView: 'dashboard',
+        currentWeek: null,
+        currentLecture: null,
+        currentTab: 'learn',
+        quizState: {},    // { "w1l1": { answers: {0: 2, 1: 1}, score: 1 } }
+        progress: {},     // { "w1l1": "viewed" | "partial" | "complete" }
+        theme: 'light',
+        expandedWeeks: {},
+        expandedCards: {},
+        saRatings: {},
+        examState: { active:false, config:{}, questions:[], answers:{}, currentQ:0, startTime:null, finished:false },
+        examHistory: [],
+        flashcardState: { mastery:{}, currentDeck:[], currentIndex:0, filter:'all', flipped:false, sessionStats:{known:0,learning:0} }
+      };
+    }
+
+    let state = getDefaultState();
+
+    function resetState() {
+      var defaults = getDefaultState();
+      for (var key in defaults) {
+        if (defaults.hasOwnProperty(key)) state[key] = defaults[key];
+      }
+    }
 
     function loadState() {
       try {
@@ -4930,6 +4941,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     function showDashboard() {
       stopTTS();
+      cleanupExam();
       state.currentView = 'dashboard';
       state.currentWeek = null;
       state.currentLecture = null;
@@ -4942,6 +4954,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
     function showLecture(weekId, lectureId) {
       stopTTS();
+      cleanupExam();
       state.currentView = 'lecture';
       state.currentWeek = weekId;
       state.currentLecture = lectureId;
@@ -5018,9 +5031,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function stripHTML(html) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || '';
+      return html.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
     }
 
     function truncate(text, len) {
@@ -5331,7 +5342,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (videos.length > 0) {
         html += '<div class="videos-section"><h3 class="videos-heading">Recommended Videos</h3>';
         videos.forEach(function(v) {
-          html += '<a href="' + v.url + '" target="_blank" class="video-card">' +
+          html += '<a href="' + v.url + '" target="_blank" rel="noopener noreferrer" class="video-card">' +
             '<div class="video-thumb"><svg viewBox="0 0 24 24" fill="var(--accent)" width="32" height="32"><path d="M8 5v14l11-7z"/></svg></div>' +
             '<div class="video-info"><div class="video-title">' + escapeHTML(v.title) + '</div>' +
             '<div class="video-channel">' + escapeHTML(v.channel) + '</div></div></a>';
@@ -5809,7 +5820,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }).catch(function(err) {
           tts.speakingIdx = -1;
           updateTTSButtons();
-          if (statusEl) statusEl.innerHTML = '<div class="tts-error">TTS error: ' + err.message + '. Make sure the server is running (python3 micro_server.py)</div>';
+          if (statusEl) statusEl.innerHTML = '<div class="tts-error">TTS error: ' + escapeHTML(err.message) + '. Make sure the server is running (python3 micro_server.py)</div>';
           document.querySelectorAll('.voice-test-btn.stop').forEach(function(b) { b.style.display = 'none'; });
         });
       } else {
@@ -5912,6 +5923,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // FEATURE: KEYBOARD SHORTCUTS
     // ==========================================
     function handleKeyboardShortcut(e) {
+      if (pomo.overlayActive) return; // Block shortcuts during break overlay
       var tag = e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -6115,6 +6127,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ==========================================
     var examTimerInterval = null;
     var examTimeLeft = 0;
+
+    function cleanupExam() {
+      if (examTimerInterval) {
+        clearInterval(examTimerInterval);
+        examTimerInterval = null;
+      }
+      examTimeLeft = 0;
+    }
 
     function toggleExamSelectAll(checked) {
       var cbs = document.querySelectorAll('.exam-lec-cb');
@@ -6951,6 +6971,8 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }
         chime();
         pomoAlarmInterval = setInterval(chime, 3000);
+        // Safety timeout: stop alarm after 60 seconds even if overlay is bypassed
+        setTimeout(function() { pomoAlarmStop(); }, 60000);
       } catch(e) {}
 
       if (Notification && Notification.permission === 'granted') {
@@ -7190,7 +7212,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function signOut() {
-      auth.signOut();
+      auth.signOut().then(function() {
+        resetState();
+        localStorage.removeItem(STORAGE_KEY);
+        userLoaded = false;
+      });
     }
 
     function updateUserProfile(user) {
@@ -7221,6 +7247,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     });
 
     var appInitialized = false;
+    var userLoaded = false;
 
     auth.onAuthStateChanged(function(user) {
       if (user) {
@@ -7241,10 +7268,15 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           }
         }
         // Load user progress from Firestore (overrides localStorage)
-        loadUserProgress();
+        // Only load once per sign-in, not on token refreshes
+        if (!userLoaded) {
+          userLoaded = true;
+          loadUserProgress();
+        }
       } else {
         currentUser = null;
         appInitialized = false;
+        userLoaded = false;
         // Show login, hide app
         document.getElementById('loginScreen').style.display = '';
         document.getElementById('appContainer').style.display = 'none';

@@ -41,7 +41,25 @@ def get_mac_voices():
     return voices
 
 
+ALLOWED_ORIGINS = {"http://localhost:8742", "http://127.0.0.1:8742"}
+
+# Cache known voice names at startup
+_known_voices = None
+def get_known_voice_names():
+    global _known_voices
+    if _known_voices is None:
+        _known_voices = {v["name"] for v in get_mac_voices()}
+    return _known_voices
+
+
 class TTSHandler(http.server.SimpleHTTPRequestHandler):
+    def _cors_header(self):
+        origin = self.headers.get("Origin", "")
+        if origin in ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", "http://localhost:8742")
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
 
@@ -49,7 +67,10 @@ class TTSHandler(http.server.SimpleHTTPRequestHandler):
             # Serve the HTML file
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._cors_header()
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.end_headers()
             with open(HTML_FILE, "rb") as f:
                 self.wfile.write(f.read())
@@ -59,7 +80,7 @@ class TTSHandler(http.server.SimpleHTTPRequestHandler):
             voices = get_mac_voices()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._cors_header()
             self.end_headers()
             self.wfile.write(json.dumps(voices).encode())
 
@@ -76,8 +97,31 @@ class TTSHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(b"Missing text parameter")
                 return
 
+            # Validate voice against known voices
+            known = get_known_voice_names()
+            if known and voice not in known:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b"Invalid voice parameter")
+                return
+
+            # Validate rate is a number between 50 and 400
+            try:
+                rate_int = int(rate)
+                if rate_int < 50 or rate_int > 400:
+                    raise ValueError
+                rate = str(rate_int)
+            except (ValueError, TypeError):
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b"Invalid rate parameter (must be 50-400)")
+                return
+
             # Limit text length for safety
             text = text[:5000]
+
+            # Sanitize text: remove shell-special characters (extra safety layer)
+            text = re.sub(r'[`$\\]', '', text)
 
             try:
                 with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
@@ -97,7 +141,7 @@ class TTSHandler(http.server.SimpleHTTPRequestHandler):
                 # Send the WAV file
                 self.send_response(200)
                 self.send_header("Content-Type", "audio/wav")
-                self.send_header("Access-Control-Allow-Origin", "*")
+                self._cors_header()
                 self.send_header("Cache-Control", "no-cache")
                 with open(wav_path, "rb") as f:
                     data = f.read()

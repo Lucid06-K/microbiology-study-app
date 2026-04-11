@@ -5733,7 +5733,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (!window.speechSynthesis) return;
       function doLoad() {
         var allVoices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('en'); });
-        if (allVoices.length === 0) return;
+        if (allVoices.length === 0) {
+          // Retry after a delay -- some browsers load voices very slowly
+          setTimeout(doLoad, 500);
+          return;
+        }
 
         // Score and sort voices by quality
         tts.voices = allVoices.map(function(v) {
@@ -5770,18 +5774,48 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
     function populateVoiceSelect(sel) {
       sel.innerHTML = '';
-      if (tts.voices.length === 0) { sel.innerHTML = '<option>No voices found</option>'; return; }
+      if (tts.voices.length === 0) { sel.innerHTML = '<option>Loading voices...</option>'; return; }
+
+      // Group voices by quality category
+      var groups = {
+        'google': {label: 'Google (Best Quality)', voices: []},
+        'premium': {label: 'Premium', voices: []},
+        'enhanced': {label: 'Enhanced', voices: []},
+        'online': {label: 'Online', voices: []},
+        'standard': {label: 'Standard', voices: []}
+      };
       tts.voices.forEach(function(v) {
-        var opt = document.createElement('option');
-        opt.value = v.name;
-        var badge = '';
-        if (v.quality === 'google') badge = ' [Google - Best]';
-        else if (v.quality === 'premium') badge = ' [Premium]';
-        else if (v.quality === 'enhanced') badge = ' [Enhanced]';
-        else if (v.quality === 'online') badge = ' [Online]';
-        opt.textContent = v.name + badge;
-        if (v.name === tts.voice) opt.selected = true;
-        sel.appendChild(opt);
+        var cat = v.quality || 'standard';
+        if (groups[cat]) groups[cat].voices.push(v);
+        else groups['standard'].voices.push(v);
+      });
+
+      var order = ['google', 'premium', 'enhanced', 'online', 'standard'];
+      var hasMultipleGroups = order.filter(function(k) { return groups[k].voices.length > 0; }).length > 1;
+
+      order.forEach(function(key) {
+        var g = groups[key];
+        if (g.voices.length === 0) return;
+        if (hasMultipleGroups) {
+          var optgroup = document.createElement('optgroup');
+          optgroup.label = g.label;
+          g.voices.forEach(function(v) {
+            var opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = v.name;
+            if (v.name === tts.voice) opt.selected = true;
+            optgroup.appendChild(opt);
+          });
+          sel.appendChild(optgroup);
+        } else {
+          g.voices.forEach(function(v) {
+            var opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = v.name;
+            if (v.name === tts.voice) opt.selected = true;
+            sel.appendChild(opt);
+          });
+        }
       });
     }
 
@@ -5890,9 +5924,16 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         }
         if (current.trim()) chunks.push(current.trim());
 
+        // Ensure voices are loaded
+        if (tts.voices.length === 0) loadBrowserVoices();
+
         var chunkIdx = 0;
         var selectedVoice = tts.voices.find(function(v) { return v.name === tts.voice; });
+        // Fallback: if saved voice not found, use first available
+        if (!selectedVoice && tts.voices.length > 0) selectedVoice = tts.voices[0];
         var speechRate = tts.rate / 175; // convert WPM to rate multiplier
+        if (speechRate < 0.1) speechRate = 1;
+        if (speechRate > 3) speechRate = 1;
         var pitch = parseFloat(localStorage.getItem('tts-pitch') || '1');
 
         function speakNextChunk() {
@@ -5903,7 +5944,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
             return;
           }
           var utter = new SpeechSynthesisUtterance(chunks[chunkIdx]);
-          if (selectedVoice && selectedVoice.browserVoice) utter.voice = selectedVoice.browserVoice;
+          if (selectedVoice && selectedVoice.browserVoice) {
+            utter.voice = selectedVoice.browserVoice;
+          } else {
+            // Last resort: grab any English voice directly
+            var fallbackVoices = window.speechSynthesis.getVoices().filter(function(v) { return v.lang.startsWith('en'); });
+            if (fallbackVoices.length > 0) utter.voice = fallbackVoices[0];
+          }
           utter.rate = speechRate;
           utter.pitch = pitch;
           utter.onend = function() { chunkIdx++; speakNextChunk(); };

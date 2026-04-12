@@ -1612,6 +1612,54 @@
     }
     .pomo-settings-btn:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3); }
 
+    /* Interactive Learning Intentions */
+    .li-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .li-card-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+    }
+    .li-card-header h3 {
+      font-size: 1.1rem; color: var(--primary); font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .li-progress-badge {
+      font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; background: var(--primary-light); color: var(--primary);
+    }
+    .li-progress-badge.complete { background: var(--primary); color: #fff; }
+    .li-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; margin-bottom: 4px;
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s;
+      font-size: 0.9rem; line-height: 1.5; color: var(--text);
+    }
+    .li-item:hover { background: var(--primary-light); }
+    .li-item.checked { color: var(--text-light); }
+    .li-item.checked .li-text { text-decoration: line-through; }
+    .li-checkbox {
+      width: 20px; height: 20px; border: 2px solid var(--border);
+      border-radius: 6px; flex-shrink: 0; margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; background: var(--card);
+    }
+    .li-item.checked .li-checkbox {
+      background: var(--primary); border-color: var(--primary);
+    }
+    .li-checkbox svg { width: 12px; height: 12px; opacity: 0; transition: opacity 0.15s; }
+    .li-item.checked .li-checkbox svg { opacity: 1; }
+    .li-text { flex: 1; }
+    .li-reset {
+      font-size: 0.72rem; color: var(--text-light); background: none; border: none;
+      cursor: pointer; font-family: var(--font); transition: color 0.15s;
+    }
+    .li-reset:hover { color: var(--primary); }
+
     /* Scroll to top button */
     .scroll-top-btn {
       position: fixed;
@@ -5304,6 +5352,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         expandedWeeks: {},
         expandedCards: {},
         saRatings: {},
+        liChecked: {},
         examState: { active:false, config:{}, questions:[], answers:{}, currentQ:0, startTime:null, finished:false },
         examHistory: [],
         flashcardState: { mastery:{}, currentDeck:[], currentIndex:0, filter:'all', flipped:false, sessionStats:{known:0,learning:0} }
@@ -5822,10 +5871,15 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
       let html = '';
       lec.explanations.forEach((exp, idx) => {
+        // Render Learning Intentions as interactive checklist
+        if (exp.title === 'Learning Intentions') {
+          html += renderLearningIntentions(exp.content, key);
+          return;
+        }
+
         const isExpanded = state.expandedCards[key] && state.expandedCards[key][idx];
         const preview = truncate(stripHTML(exp.content), 150);
 
-        // Build extra images HTML for this topic
         var topicImages = getImagesForTopic(state.currentLecture, exp.title);
         var extraImgHTML = '';
         if (topicImages.length > 0) {
@@ -5862,6 +5916,62 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       }
 
       return html;
+    }
+
+    function renderLearningIntentions(content, lectureKey) {
+      // Extract list items from the HTML content
+      var items = [];
+      var matches = content.match(/<li>(.*?)<\/li>/gi);
+      if (matches) {
+        matches.forEach(function(m) {
+          items.push(m.replace(/<\/?li>/gi, '').trim());
+        });
+      }
+      if (items.length === 0) return '';
+
+      // Get checked state from localStorage
+      if (!state.liChecked) state.liChecked = {};
+      if (!state.liChecked[lectureKey]) state.liChecked[lectureKey] = {};
+      var checked = state.liChecked[lectureKey];
+      var checkedCount = 0;
+      items.forEach(function(item, i) { if (checked[i]) checkedCount++; });
+      var allDone = checkedCount === items.length;
+
+      var itemsHTML = '';
+      items.forEach(function(item, i) {
+        var isChecked = checked[i] ? ' checked' : '';
+        itemsHTML +=
+          '<div class="li-item' + isChecked + '" onclick="toggleLI(\'' + lectureKey + '\',' + i + ')">' +
+            '<div class="li-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+            '<div class="li-text">' + item + '</div>' +
+          '</div>';
+      });
+
+      return '<div class="li-card">' +
+        '<div class="li-card-header">' +
+          '<h3>Learning Intentions</h3>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="li-progress-badge' + (allDone ? ' complete' : '') + '">' + checkedCount + '/' + items.length + '</span>' +
+            '<button class="li-reset" onclick="event.stopPropagation();resetLI(\'' + lectureKey + '\')">Reset</button>' +
+          '</div>' +
+        '</div>' +
+        '<p style="font-size:0.85rem;color:var(--text-light);margin-bottom:12px;">Tick off each intention as you feel confident about it:</p>' +
+        itemsHTML +
+      '</div>';
+    }
+
+    function toggleLI(lectureKey, idx) {
+      if (!state.liChecked) state.liChecked = {};
+      if (!state.liChecked[lectureKey]) state.liChecked[lectureKey] = {};
+      state.liChecked[lectureKey][idx] = !state.liChecked[lectureKey][idx];
+      saveState();
+      renderLecture();
+    }
+
+    function resetLI(lectureKey) {
+      if (state.liChecked) state.liChecked[lectureKey] = {};
+      saveState();
+      renderLecture();
     }
 
     function toggleCard(idx) {
@@ -6643,9 +6753,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     // Speak sentences one at a time with highlighting
+    var ttsSpeakId = 0; // Guard against duplicate speech from stale callbacks
+
     function speakSentences(cardIdx, startIdx) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
+      ttsSpeakId++; // Invalidate any in-flight callbacks from previous speech
+      var mySpeakId = ttsSpeakId;
 
       tts.speakingIdx = cardIdx;
       tts.paused = false;
@@ -6682,12 +6796,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var sentIdx = startIdx;
 
       function speakNext() {
+        // Guard: if a new speakSentences call was made, stop this chain
+        if (mySpeakId !== ttsSpeakId) return;
         if (sentIdx >= tts.sentences.length || tts.speakingIdx !== cardIdx) {
           finishTTSPlayback();
           return;
         }
 
-        // Highlight current sentence
         highlightSentence(sentIdx);
         tts.currentSentenceIdx = sentIdx;
         updatePlaybackProgress();
@@ -6701,8 +6816,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         utter.rate = speechRate;
         utter.pitch = pitch;
 
-        utter.onend = function() { sentIdx++; speakNext(); };
-        utter.onerror = function() { sentIdx++; speakNext(); };
+        utter.onend = function() {
+          if (mySpeakId !== ttsSpeakId) return;
+          sentIdx++; speakNext();
+        };
+        utter.onerror = function() {
+          if (mySpeakId !== ttsSpeakId) return;
+          sentIdx++; speakNext();
+        };
 
         window.speechSynthesis.speak(utter);
       }
@@ -7879,7 +8000,8 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         '<div class="pomo-overlay-countdown" id="pomoOverlayCountdown">' +
           (canDismiss ? 'You may continue.' : phaseLabel + ' timer: ' + fmtTime(pomo.overlaySecondsLeft) + ' remaining') +
         '</div>' +
-        '<button class="pomo-overlay-dismiss ' + (canDismiss ? 'show' : '') + '" id="pomoDismissBtn" onclick="dismissPomoOverlay()">Continue Studying</button>';
+        '<button class="pomo-overlay-dismiss ' + (canDismiss ? 'show' : '') + '" id="pomoDismissBtn" onclick="dismissPomoOverlay()">Continue Studying</button>' +
+        (canDismiss ? '' : '<button class="pomo-overlay-dismiss show" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);margin-top:8px;font-size:0.85rem;" onclick="dismissPomoOverlay()">Skip Break</button>');
     }
 
     function dismissPomoOverlay() {
@@ -7936,9 +8058,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           }, 300);
         }
         chime();
-        pomoAlarmInterval = setInterval(chime, 3000);
-        // Safety timeout: stop alarm after 60 seconds even if overlay is bypassed
-        setTimeout(function() { pomoAlarmStop(); }, 60000);
+        // Single chime only -- no repeating alarm
       } catch(e) {}
 
       if (Notification && Notification.permission === 'granted') {
@@ -7980,16 +8100,16 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ONBOARDING TOUR
     // ==========================================
     var tourSteps = [
-      { target: '#dashboardBtn', title: 'Dashboard', text: 'This is your home base. See your overall progress, start mock exams, flashcards, and find your weak areas all in one place.' },
-      { target: '#sidebarNav', title: 'Weekly Lectures', text: 'All 13 lectures are organised by week. Click any lecture to open it. The coloured dots show your progress: grey = not started, yellow = in progress, green = mastered.' },
-      { target: '#searchInput', title: 'Search Everything', text: 'Search across all explanations, terms, and facts instantly. Results link directly to the right lecture and tab.' },
-      { target: '#ttsToggleBtn', title: 'Text-to-Speech', text: 'Click here to configure text-to-speech. Each explanation card has a speaker button that reads the content aloud using your Mac\'s voices.' },
-      { target: '#themeToggle', title: 'Dark / Light Mode', text: 'Toggle between light and dark themes. Your preference is saved automatically.' },
-      { target: '#tourBtn', title: 'App Tour', text: 'You can replay this tour anytime by clicking this button.' },
-      { target: '.pomo-container', title: 'Pomodoro Timer', text: '25-minute focus sessions with breaks built in. Customise the durations in Settings. When a session ends, a full-screen overlay forces you to take your break.' },
-      { target: null, title: 'Lecture Tabs', text: 'Each lecture has 5 tabs:\n\n<b>Learn</b> -- Detailed explanations with diagrams and analogies\n<b>Terms</b> -- Searchable glossary of key vocabulary\n<b>Facts</b> -- Quick-reference bullet points\n<b>Quiz</b> -- 20 multiple choice + 5 short answer questions\n<b>Flashcards</b> -- Flip cards with spaced repetition', virtual: true },
-      { target: null, title: 'Keyboard Shortcuts', text: 'Press <b>?</b> anytime to see all keyboard shortcuts.\n\nArrow keys navigate lectures, <b>1-5</b> switch tabs, <b>Space</b> flips flashcards, <b>S</b> opens search, <b>D</b> goes to dashboard.', virtual: true },
-      { target: null, title: 'You\'re all set!', text: 'Your progress saves automatically in the browser -- quizzes, flashcard mastery, exam history, everything.\n\nGood luck with your studies! Start by clicking a lecture in the sidebar.', virtual: true, last: true },
+      { target: '#dashboardBtn', title: 'Dashboard', text: 'Your home base. See overall progress, start mock exams, study flashcards, and review your weak areas.' },
+      { target: '#sidebarNav', title: 'Weekly Lectures', text: 'All 13 lectures organised by week. Click any lecture to open it. Coloured dots show progress: grey = not started, yellow = in progress, green = mastered.' },
+      { target: '#searchInput', title: 'Search', text: 'Search across all explanations, terms, and facts. Click a result to jump straight to it.' },
+      { target: '#ttsToggleBtn', title: 'Text-to-Speech', text: 'Configure your TTS voice and speed here. Each explanation card has a speaker button -- click it to hear the content read aloud with sentence-by-sentence highlighting. A playback bar appears at the bottom with pause, stop, and speed controls.' },
+      { target: '#themeToggle', title: 'Dark / Light Mode', text: 'Toggle between light and dark themes. Saved automatically.' },
+      { target: '.pomo-container', title: 'Pomodoro Timer', text: 'Focus timer with customisable work/break durations. When a focus session ends, a full-screen overlay reminds you to take a break. You can skip the break if needed. Click Settings to adjust times.' },
+      { target: null, title: 'Learning Intentions', text: 'Each lecture starts with interactive <b>Learning Intentions</b> -- tick off each one as you feel confident. Your progress is tracked per lecture.', virtual: true },
+      { target: null, title: 'Lecture Tabs', text: 'Each lecture has 5 tabs:\n\n<b>Learn</b> -- Explanations with diagrams, images, and YouTube videos\n<b>Terms</b> -- Searchable glossary of key vocabulary\n<b>Facts</b> -- Quick-reference bullet points\n<b>Quiz</b> -- 20 MCQ + 5 short answer (10 marks each)\n<b>Flashcards</b> -- Flip cards with spaced repetition', virtual: true },
+      { target: null, title: 'Study Tools', text: '<b>Mock Exam</b> -- Timed practice exams across multiple lectures\n<b>Weak Areas</b> -- Auto-identifies topics you scored poorly on\n<b>Flashcards</b> -- Review terms with "Know it" / "Still learning" tracking\n<b>Keyboard Shortcuts</b> -- Press <b>?</b> to see all shortcuts', virtual: true },
+      { target: null, title: 'You\'re all set!', text: 'Your progress syncs to the cloud via Google sign-in -- quizzes, flashcards, learning intentions, exam history, everything.\n\nShare this app with friends -- everyone gets their own progress!\n\nGood luck with your studies!', virtual: true, last: true },
     ];
     var tourCurrent = 0;
     var tourActive = false;

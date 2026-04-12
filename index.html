@@ -7583,16 +7583,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
     // Scroll to top button
     function scrollToTop() {
-      var main = document.getElementById('main');
-      if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function initScrollTopBtn() {
-      var main = document.getElementById('main');
       var btn = document.getElementById('scrollTopBtn');
-      if (!main || !btn) return;
-      main.addEventListener('scroll', function() {
-        if (main.scrollTop > 300) {
+      if (!btn) return;
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 300) {
           btn.classList.add('visible');
         } else {
           btn.classList.remove('visible');

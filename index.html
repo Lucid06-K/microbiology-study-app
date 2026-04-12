@@ -5368,13 +5368,17 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       }
     }
 
+    var VALID_STATE_KEYS = Object.keys(getDefaultState());
+
     function loadState() {
       try {
         var saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           var parsed = JSON.parse(saved);
           for (var key in parsed) {
-            if (parsed.hasOwnProperty(key)) state[key] = parsed[key];
+            if (parsed.hasOwnProperty(key) && VALID_STATE_KEYS.indexOf(key) >= 0) {
+              state[key] = parsed[key];
+            }
           }
         }
       } catch (e) { /* ignore */ }
@@ -5391,8 +5395,6 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         saveTimeout = setTimeout(function() {
           db.collection('users').doc(currentUser.uid).set({
             state: JSON.stringify(state),
-            email: currentUser.email,
-            displayName: currentUser.displayName,
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
           }, {merge: true}).catch(function(err) {
             console.error('Firestore save error:', err);
@@ -5407,7 +5409,9 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         if (doc.exists && doc.data().state) {
           var saved = JSON.parse(doc.data().state);
           for (var key in saved) {
-            if (saved.hasOwnProperty(key)) state[key] = saved[key];
+            if (saved.hasOwnProperty(key) && VALID_STATE_KEYS.indexOf(key) >= 0) {
+              state[key] = saved[key];
+            }
           }
         }
         // Re-render after loading
@@ -6123,6 +6127,52 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       return html;
     }
 
+    function playCorrectSound() {
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // Play a pleasant two-note ascending chime
+        var t = ctx.currentTime;
+
+        // First note (C5)
+        var osc1 = ctx.createOscillator();
+        var gain1 = ctx.createGain();
+        osc1.connect(gain1); gain1.connect(ctx.destination);
+        osc1.frequency.value = 523;
+        osc1.type = 'sine';
+        gain1.gain.setValueAtTime(0.3, t);
+        gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+        osc1.start(t);
+        osc1.stop(t + 0.3);
+
+        // Second note (E5) - slightly delayed
+        var osc2 = ctx.createOscillator();
+        var gain2 = ctx.createGain();
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+        osc2.frequency.value = 659;
+        osc2.type = 'sine';
+        gain2.gain.setValueAtTime(0.3, t + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+        osc2.start(t + 0.15);
+        osc2.stop(t + 0.45);
+      } catch(e) {}
+    }
+
+    function playWrongSound() {
+      try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var t = ctx.currentTime;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 200;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+        osc.start(t);
+        osc.stop(t + 0.3);
+      } catch(e) {}
+    }
+
     function answerQuiz(qIdx, optIdx) {
       const key = lectureKey(state.currentWeek, state.currentLecture);
       if (!state.quizState[key]) state.quizState[key] = { answers: {}, score: 0 };
@@ -6136,6 +6186,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       // Recalculate score
       const lec = getLecture(state.currentWeek, state.currentLecture);
       if (!lec) return;
+
+      // Play sound feedback based on correctness
+      if (lec.quiz[qIdx] && optIdx === lec.quiz[qIdx].ans) {
+        playCorrectSound();
+      } else {
+        playWrongSound();
+      }
+
       let score = 0;
       Object.keys(qs.answers).forEach(k => {
         if (lec.quiz[k] && qs.answers[k] === lec.quiz[k].ans) score++;
@@ -7489,6 +7547,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         '</div>' +
         '</div>';
 
+      // Play sound based on exam result
+      if (pct >= 70) {
+        playCorrectSound();
+      } else {
+        playWrongSound();
+      }
+
       updateSidebarActive();
     }
 
@@ -8029,7 +8094,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
     // Alarm sound (repeating gentle chime)
     var pomoAlarmCtx = null;
-    var pomoAlarmInterval = null;
+    // (alarm is single chime, no interval needed)
 
     function pomoAlarmStart() {
       try {
@@ -8067,7 +8132,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function pomoAlarmStop() {
-      if (pomoAlarmInterval) { clearInterval(pomoAlarmInterval); pomoAlarmInterval = null; }
+      // Nothing to clear (single chime, no interval)
       if (pomoAlarmCtx) { try { pomoAlarmCtx.close(); } catch(e) {} pomoAlarmCtx = null; }
     }
 

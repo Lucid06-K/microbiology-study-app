@@ -8000,8 +8000,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         '<div class="pomo-overlay-countdown" id="pomoOverlayCountdown">' +
           (canDismiss ? 'You may continue.' : phaseLabel + ' timer: ' + fmtTime(pomo.overlaySecondsLeft) + ' remaining') +
         '</div>' +
-        '<button class="pomo-overlay-dismiss ' + (canDismiss ? 'show' : '') + '" id="pomoDismissBtn" onclick="dismissPomoOverlay()">Continue Studying</button>' +
-        (canDismiss ? '' : '<button class="pomo-overlay-dismiss show" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);margin-top:8px;font-size:0.85rem;" onclick="dismissPomoOverlay()">Skip Break</button>');
+        '<button class="pomo-overlay-dismiss show" id="pomoDismissBtn" onclick="dismissPomoOverlay()">' + (canDismiss ? 'Continue Studying' : 'Skip Break') + '</button>';
     }
 
     function dismissPomoOverlay() {

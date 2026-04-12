@@ -1611,6 +1611,28 @@
       padding: 4px 14px; margin-top: 4px; transition: all 0.15s;
     }
     .pomo-settings-btn:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    /* Scroll to top button */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 42px; height: 42px;
+      border: none; border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .scroll-top-btn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .scroll-top-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .scroll-top-btn svg { width: 20px; height: 20px; pointer-events: none; }
     .pomo-settings {
       width: 100%; display: none; flex-direction: column; gap: 6px;
       padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px;
@@ -1908,6 +1930,10 @@
   <main class="main" id="main">
     <div class="content-area" id="contentArea"></div>
   </main>
+
+  <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" title="Scroll to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
 
   </div><!-- end appContainer -->
 
@@ -7555,6 +7581,25 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (pomoAlarmCtx) { try { pomoAlarmCtx.close(); } catch(e) {} pomoAlarmCtx = null; }
     }
 
+    // Scroll to top button
+    function scrollToTop() {
+      var main = document.getElementById('main');
+      if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initScrollTopBtn() {
+      var main = document.getElementById('main');
+      var btn = document.getElementById('scrollTopBtn');
+      if (!main || !btn) return;
+      main.addEventListener('scroll', function() {
+        if (main.scrollTop > 300) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+      });
+    }
+
     function initPomodoro() {
       renderPomodoro();
       if (Notification && Notification.permission === 'default') {
@@ -7831,6 +7876,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           appInitialized = true;
           init();
           initPomodoro();
+          initScrollTopBtn();
           // Show tour on first launch only
           if (!localStorage.getItem('tour-done')) {
             setTimeout(function() { startTour(); }, 500);

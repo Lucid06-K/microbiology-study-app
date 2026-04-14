@@ -1909,7 +1909,7 @@
     <div class="sidebar-logo">
       <h1><span class="emoji">&#x1F52C;</span> MicroStudy</h1>
       <p>Microbiology in Agriculture</p>
-      <span id="appVersion" style="font-size:0.6rem;color:rgba(255,255,255,0.3);margin-top:2px;display:block;">v3.5.1</span>
+      <span id="appVersion" style="font-size:0.6rem;color:rgba(255,255,255,0.3);margin-top:2px;display:block;">v3.5.2</span>
     </div>
     <button class="sidebar-dashboard active" id="dashboardBtn" onclick="showDashboard()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -5779,8 +5779,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
               '<select id="examQCount"><option value="20">20</option><option value="30">30</option><option value="50">50</option><option value="all">All</option></select>' +
             '</div>' +
             '<div class="exam-quick-field">' +
-              '<label>Timer</label>' +
-              '<select id="examTimer"><option value="0">Off</option><option value="30">30s</option><option value="60">60s</option><option value="90">90s</option></select>' +
+              '<label>Timer per Q</label>' +
+              '<div style="display:flex;align-items:center;gap:4px;">' +
+                '<input type="number" id="examTimerMin" min="0" max="59" value="1" style="width:42px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:0.85rem;text-align:center;font-family:var(--font);">' +
+                '<span style="font-size:0.8rem;color:var(--text-light);">m</span>' +
+                '<input type="number" id="examTimerSec" min="0" max="59" value="0" style="width:42px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:0.85rem;text-align:center;font-family:var(--font);">' +
+                '<span style="font-size:0.8rem;color:var(--text-light);">s</span>' +
+              '</div>' +
             '</div>' +
             '<button class="dash-exam-btn" onclick="startExam()">Start</button>' +
           '</div>' +
@@ -7339,7 +7344,9 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var count = qCountVal === 'all' ? allQuestions.length : Math.min(parseInt(qCountVal), allQuestions.length);
       allQuestions = allQuestions.slice(0, count);
 
-      var timerVal = parseInt(document.getElementById('examTimer').value);
+      var timerMin = parseInt(document.getElementById('examTimerMin').value) || 0;
+      var timerSec = parseInt(document.getElementById('examTimerSec').value) || 0;
+      var timerVal = timerMin * 60 + timerSec;
 
       state.examState = {
         active: true,

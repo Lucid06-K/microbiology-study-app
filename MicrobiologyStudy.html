@@ -5428,11 +5428,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // Save immediately when user leaves the page
     window.addEventListener('beforeunload', function() {
       if (currentUser) {
-        // Use synchronous localStorage save
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-        // Fire Firestore save (may or may not complete)
         saveToFirestore();
       }
+      // Always save pomo state on page close
+      if (pomo.running) savePomoState();
     });
 
     // Also save when tab becomes hidden (switching tabs, minimizing)
@@ -8011,6 +8011,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
         pomo.running = true;
         pomo.interval = setInterval(pomoTick, 1000);
       }
+      savePomoState();
       renderPomodoro();
     }
 
@@ -8018,11 +8019,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (pomo.secondsLeft <= 0) {
         clearInterval(pomo.interval);
         pomo.running = false;
+        savePomoState();
         showPomoOverlay();
         renderPomodoro();
         return;
       }
       pomo.secondsLeft--;
+      // Save every 10 seconds to reduce writes
+      if (pomo.secondsLeft % 10 === 0) savePomoState();
       renderPomodoro();
     }
 
@@ -8032,6 +8036,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       pomo.phase = 'work';
       pomo.secondsLeft = pomo.workMins * 60;
       pomo.totalSeconds = pomo.secondsLeft;
+      clearPomoState();
       renderPomodoro();
     }
 
@@ -8194,7 +8199,59 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       });
     }
 
+    function savePomoState() {
+      var data = {
+        phase: pomo.phase,
+        secondsLeft: pomo.secondsLeft,
+        totalSeconds: pomo.totalSeconds,
+        session: pomo.session,
+        running: pomo.running,
+        savedAt: Date.now()
+      };
+      try { localStorage.setItem('pomo-state', JSON.stringify(data)); } catch(e) {}
+    }
+
+    function clearPomoState() {
+      try { localStorage.removeItem('pomo-state'); } catch(e) {}
+    }
+
     function initPomodoro() {
+      // Restore pomo state from localStorage
+      try {
+        var saved = localStorage.getItem('pomo-state');
+        if (saved) {
+          var data = JSON.parse(saved);
+          pomo.phase = data.phase || 'work';
+          pomo.session = data.session || 1;
+          pomo.totalSeconds = data.totalSeconds || pomo.workMins * 60;
+
+          if (data.running && data.savedAt) {
+            // Calculate how much time passed since save
+            var elapsed = Math.floor((Date.now() - data.savedAt) / 1000);
+            var remaining = (data.secondsLeft || 0) - elapsed;
+
+            if (remaining > 0) {
+              // Timer still has time left -- resume it
+              pomo.secondsLeft = remaining;
+              pomo.running = true;
+              pomo.interval = setInterval(pomoTick, 1000);
+            } else {
+              // Timer would have finished while page was closed
+              pomo.secondsLeft = 0;
+              pomo.running = false;
+              // Show the overlay for the completed phase
+              renderPomodoro();
+              showPomoOverlay();
+              return;
+            }
+          } else {
+            // Was paused -- restore exact state
+            pomo.secondsLeft = data.secondsLeft || pomo.totalSeconds;
+            pomo.running = false;
+          }
+        }
+      } catch(e) {}
+
       renderPomodoro();
       if (Notification && Notification.permission === 'default') {
         Notification.requestPermission();

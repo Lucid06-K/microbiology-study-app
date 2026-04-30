@@ -1881,6 +1881,60 @@
       .user-profile-btn { padding: 4px; }
     }
 
+    /* ===== TTS inline highlight overlay (option A) ===== */
+    .tts-highlight-host { position: relative; }
+    .tts-highlight-host > * { position: relative; z-index: 1; }
+    .tts-highlight-layer {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .tts-hl-rect {
+      position: absolute;
+      background: var(--primary-light);
+      border-radius: 3px;
+      animation: tts-hl-in 0.18s ease-out both;
+    }
+    [data-theme="dark"] .tts-hl-rect { background: rgba(62,207,191,0.20); }
+    @keyframes tts-hl-in {
+      from { opacity: 0; transform: translateY(2px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .tts-mode-row {
+      display: flex;
+      gap: 4px;
+      margin: 8px 0 4px;
+      padding: 3px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .tts-mode-btn {
+      flex: 1;
+      padding: 6px 10px;
+      font-family: var(--font);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: transparent;
+      border: 0;
+      border-radius: 6px;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .tts-mode-btn:hover { color: var(--text); }
+    .tts-mode-btn.active { background: var(--primary); color: #fff; }
+    .tts-mode-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      margin-top: 8px;
+    }
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -1969,6 +2023,11 @@
         <button class="voice-test-btn stop" onclick="stopTTS()" id="testStopBtn" style="display:none;">Stop</button>
         <button class="voice-test-btn save" onclick="saveVoicePref()">Save</button>
       </div>
+    </div>
+    <span class="tts-mode-label">Highlight style</span>
+    <div class="tts-mode-row" role="group" aria-label="TTS highlight style">
+      <button class="tts-mode-btn" id="ttsModeTracker" onclick="setTTSHighlightMode('tracker')">Tracker box</button>
+      <button class="tts-mode-btn" id="ttsModeOverlay" onclick="setTTSHighlightMode('overlay')">Inline overlay</button>
     </div>
     <div class="voice-saved-msg" id="voiceSavedMsg">Settings saved!</div>
     <div class="voice-sample-text" id="voiceSampleText">Microorganisms are found in all environments on Earth. Bacteria are the origin of all life. Think of microorganisms as invisible workers on a farm.</div>
@@ -6748,6 +6807,133 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (statusEl) statusEl.innerHTML = '';
     }
 
+    // ===== Inline TTS overlay (option A) =====
+    var TTS_HIGHLIGHT_MODE = localStorage.getItem('tts-highlight-mode') || 'tracker';
+
+    function setTTSHighlightMode(mode) {
+      if (mode !== 'tracker' && mode !== 'overlay') return;
+      TTS_HIGHLIGHT_MODE = mode;
+      localStorage.setItem('tts-highlight-mode', mode);
+      var t = document.getElementById('ttsModeTracker');
+      var o = document.getElementById('ttsModeOverlay');
+      if (t) t.classList.toggle('active', mode === 'tracker');
+      if (o) o.classList.toggle('active', mode === 'overlay');
+      // Swap visuals immediately if currently speaking
+      if (tts.speakingIdx >= 0) {
+        var card = document.getElementById('expCard-' + tts.speakingIdx);
+        var bodyEl = card ? card.querySelector('.explanation-card-body') : null;
+        if (bodyEl) {
+          if (mode === 'tracker') removeOverlayLayer(bodyEl);
+          else removeTrackerBox(bodyEl);
+        }
+      }
+    }
+
+    function removeOverlayLayer(bodyEl) {
+      if (!bodyEl) return;
+      var layer = bodyEl.querySelector('.tts-highlight-layer');
+      if (layer) layer.remove();
+      bodyEl.classList.remove('tts-highlight-host');
+    }
+
+    function removeTrackerBox(bodyEl) {
+      if (!bodyEl) return;
+      var t = bodyEl.querySelector('.tts-tracker');
+      if (t) t.remove();
+    }
+
+    function buildSentenceRangesFromBody(bodyEl) {
+      var skip = function(p) {
+        while (p && p !== bodyEl) {
+          if (p.classList && (
+            p.classList.contains('tts-tracker') ||
+            p.classList.contains('tts-highlight-layer') ||
+            p.classList.contains('video-card') ||
+            p.classList.contains('videos-section') ||
+            p.classList.contains('diagram-caption')
+          )) return true;
+          p = p.parentElement;
+        }
+        return false;
+      };
+      var walker = document.createTreeWalker(bodyEl, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(node) {
+          if (!node.textContent || !node.textContent.trim()) return NodeFilter.FILTER_REJECT;
+          if (skip(node.parentElement)) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var nodes = [], starts = [], flat = '';
+      var n;
+      while ((n = walker.nextNode())) {
+        starts.push(flat.length);
+        nodes.push(n);
+        flat += n.textContent;
+      }
+
+      function locate(off) {
+        for (var i = starts.length - 1; i >= 0; i--) {
+          if (starts[i] <= off) {
+            var local = off - starts[i];
+            return { node: nodes[i], offset: Math.min(local, nodes[i].textContent.length) };
+          }
+        }
+        return null;
+      }
+
+      var ranges = [], strings = [];
+      var re = /[^.!?]+[.!?]+/g;
+      var m;
+      while ((m = re.exec(flat))) {
+        var trimmed = m[0].trim();
+        if (trimmed.length === 0) continue;
+        var leadOffset = m[0].length - m[0].replace(/^\s+/, '').length;
+        var s = locate(m.index + leadOffset);
+        var e = locate(m.index + m[0].length);
+        if (!s || !e) continue;
+        try {
+          var r = document.createRange();
+          r.setStart(s.node, s.offset);
+          r.setEnd(e.node, e.offset);
+          ranges.push(r);
+          strings.push(trimmed);
+        } catch (err) { /* skip malformed */ }
+      }
+      return { ranges: ranges, strings: strings };
+    }
+
+    function setOverlayHighlight(bodyEl, range) {
+      if (!bodyEl) return;
+      bodyEl.classList.add('tts-highlight-host');
+      var layer = bodyEl.querySelector('.tts-highlight-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.className = 'tts-highlight-layer';
+        bodyEl.appendChild(layer);
+      }
+      layer.innerHTML = '';
+      if (!range) return;
+      var bodyRect = bodyEl.getBoundingClientRect();
+      var clientRects = range.getClientRects();
+      var firstRectEl = null;
+      for (var i = 0; i < clientRects.length; i++) {
+        var r = clientRects[i];
+        if (r.width === 0 || r.height === 0) continue;
+        var div = document.createElement('div');
+        div.className = 'tts-hl-rect';
+        div.style.left = (r.left - bodyRect.left + bodyEl.scrollLeft - 2) + 'px';
+        div.style.top = (r.top - bodyRect.top + bodyEl.scrollTop - 1) + 'px';
+        div.style.width = (r.width + 4) + 'px';
+        div.style.height = (r.height + 2) + 'px';
+        layer.appendChild(div);
+        if (!firstRectEl) firstRectEl = div;
+      }
+      if (firstRectEl && firstRectEl.scrollIntoView) {
+        firstRectEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    // ===== End inline TTS overlay =====
+
     function toggleTTS(idx) {
       if (tts.speakingIdx === idx) {
         // Stop TTS if already playing this card
@@ -6775,34 +6961,49 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var card = document.getElementById('expCard-' + idx);
       if (card && !card.classList.contains('expanded')) toggleCard(idx);
 
-      // Get plain text and split into sentences
-      var rawHTML = lec.explanations[idx].content;
-      var plainText = stripHTML(rawHTML).replace(/Figure:.*?(\.|$)/gi, '').replace(/\s+/g, ' ').trim();
+      var bodyEl = card ? card.querySelector('.explanation-card-body') : null;
+      if (bodyEl) { removeOverlayLayer(bodyEl); removeTrackerBox(bodyEl); }
+      tts.overlayRanges = null;
+      tts.overlayBody = null;
 
-      // Split into sentences
-      var sentences = plainText.match(/[^.!?]+[.!?]+/g) || [plainText];
-      sentences = sentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      var sentences;
+      if (TTS_HIGHLIGHT_MODE === 'overlay' && bodyEl) {
+        var built = buildSentenceRangesFromBody(bodyEl);
+        if (built.strings.length > 0) {
+          sentences = built.strings;
+          tts.overlayRanges = built.ranges;
+          tts.overlayBody = bodyEl;
+        }
+      }
+
+      if (!sentences) {
+        // Plain-text split (used by tracker mode and as overlay fallback)
+        var rawHTML = lec.explanations[idx].content;
+        var plainText = stripHTML(rawHTML).replace(/Figure:.*?(\.|$)/gi, '').replace(/\s+/g, ' ').trim();
+        sentences = plainText.match(/[^.!?]+[.!?]+/g) || [plainText];
+        sentences = sentences.map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      }
       tts.sentences = sentences;
       tts.totalSentences = sentences.length;
       tts.currentSentenceIdx = 0;
 
-      // Add a sentence tracker ABOVE the original content (don't replace it)
-      var bodyEl = card ? card.querySelector('.explanation-card-body') : null;
       if (bodyEl) {
-        // Remove any existing tracker
-        var oldTracker = bodyEl.querySelector('.tts-tracker');
-        if (oldTracker) oldTracker.remove();
-
-        var tracker = document.createElement('div');
-        tracker.className = 'tts-tracker';
-        tracker.id = 'ttsTracker';
-        var trackerHTML = '<div class="tts-tracker-label">Now reading</div>';
-        sentences.forEach(function(s, i) {
-          trackerHTML += '<span class="tts-tracker-sentence" data-sent-idx="' + i + '" onclick="jumpToSentence(' + idx + ',' + i + ')">' + escapeHTML(s) + ' </span>';
-        });
-        tracker.innerHTML = trackerHTML;
-        bodyEl.insertBefore(tracker, bodyEl.firstChild);
-        tts.sentenceElements = tracker.querySelectorAll('.tts-tracker-sentence');
+        if (TTS_HIGHLIGHT_MODE === 'overlay' && tts.overlayRanges) {
+          // Layer is created lazily on first highlight; nothing to insert here.
+          tts.sentenceElements = [];
+        } else {
+          // Tracker box (original behavior)
+          var tracker = document.createElement('div');
+          tracker.className = 'tts-tracker';
+          tracker.id = 'ttsTracker';
+          var trackerHTML = '<div class="tts-tracker-label">Now reading</div>';
+          sentences.forEach(function(s, i) {
+            trackerHTML += '<span class="tts-tracker-sentence" data-sent-idx="' + i + '" onclick="jumpToSentence(' + idx + ',' + i + ')">' + escapeHTML(s) + ' </span>';
+          });
+          tracker.innerHTML = trackerHTML;
+          bodyEl.insertBefore(tracker, bodyEl.firstChild);
+          tts.sentenceElements = tracker.querySelectorAll('.tts-tracker-sentence');
+        }
       }
 
       // Show playback bar
@@ -6909,6 +7110,13 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
 
     function highlightSentence(idx) {
+      // Overlay mode: paint rect over the original text
+      if (TTS_HIGHLIGHT_MODE === 'overlay' && tts.overlayRanges && tts.overlayBody) {
+        var range = tts.overlayRanges[idx];
+        if (range) setOverlayHighlight(tts.overlayBody, range);
+        return;
+      }
+      // Tracker mode: highlight the matching span in the tracker box
       if (tts.sentenceElements) {
         tts.sentenceElements.forEach(function(el) { el.classList.remove('speaking'); });
         if (tts.sentenceElements[idx]) {
@@ -7039,6 +7247,11 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       // Remove the tracker div (original content was never modified)
       var tracker = document.getElementById('ttsTracker');
       if (tracker) tracker.remove();
+
+      // Remove overlay layer if it was used
+      if (tts.overlayBody) removeOverlayLayer(tts.overlayBody);
+      tts.overlayBody = null;
+      tts.overlayRanges = null;
 
       tts.sentenceElements = [];
       tts.sentences = [];
@@ -8496,7 +8709,36 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     var appInitialized = false;
     var userLoaded = false;
 
+    // ===== TEMP: LOCAL DEV AUTH BYPASS =====
+    // Set BYPASS_AUTH = false (or delete this block) to restore Google sign-in.
+    var BYPASS_AUTH = true;
+    if (BYPASS_AUTH) {
+      var loginScreenEl = document.getElementById('loginScreen');
+      var appContainerEl = document.getElementById('appContainer');
+      if (loginScreenEl) loginScreenEl.style.display = 'none';
+      if (appContainerEl) appContainerEl.style.display = '';
+      var nameEl = document.getElementById('userName');
+      var ddName = document.getElementById('userDropdownName');
+      var ddEmail = document.getElementById('userDropdownEmail');
+      if (nameEl) nameEl.textContent = 'Local';
+      if (ddName) ddName.textContent = 'Local user';
+      if (ddEmail) ddEmail.textContent = 'auth bypassed';
+      if (!appInitialized) {
+        appInitialized = true;
+        init();
+        initPomodoro();
+        initScrollTopBtn();
+      }
+    }
+    // ===== END BYPASS =====
+
+    // Sync TTS mode toggle UI with persisted preference
+    if (typeof setTTSHighlightMode === 'function') {
+      setTTSHighlightMode(TTS_HIGHLIGHT_MODE);
+    }
+
     auth.onAuthStateChanged(function(user) {
+      if (BYPASS_AUTH) return;
       if (user) {
         currentUser = user;
         // Hide login, show app

@@ -1901,6 +1901,13 @@
       from { opacity: 0; transform: translateY(2px); }
       to   { opacity: 1; transform: none; }
     }
+    .tts-hl-preview-rect {
+      position: absolute;
+      border-bottom: 2px solid var(--primary);
+      opacity: 0.45;
+      pointer-events: none;
+      transition: opacity 0.12s ease-out;
+    }
     .tts-mode-row {
       display: flex;
       gap: 4px;
@@ -6834,8 +6841,8 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var layer = bodyEl.querySelector('.tts-highlight-layer');
       if (layer) layer.remove();
       bodyEl.classList.remove('tts-highlight-host');
-      bodyEl.removeEventListener('click', overlayClickHandler);
       bodyEl.style.cursor = '';
+      if (__ttsResizeObs) { try { __ttsResizeObs.unobserve(bodyEl); } catch (e) {} }
     }
 
     function removeTrackerBox(bodyEl) {
@@ -6915,39 +6922,173 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       return null;
     }
 
-    function findSentenceIdxAtPoint(x, y) {
-      if (!tts.overlayRanges) return -1;
+    // Per-body cached ranges so hover preview and click-before-start work.
+    function getOrBuildRangesForBody(bodyEl) {
+      if (!bodyEl) return null;
+      if (bodyEl.__ttsRanges && bodyEl.__ttsRanges.length) return bodyEl.__ttsRanges;
+      var built = buildSentenceRangesFromBody(bodyEl);
+      bodyEl.__ttsRanges = built.ranges;
+      bodyEl.__ttsStrings = built.strings;
+      return built.ranges;
+    }
+
+    function findIdxInRanges(ranges, x, y) {
+      if (!ranges || !ranges.length) return -1;
       var caret = getCaretRangeAt(x, y);
       if (!caret) return -1;
-      // Use START_TO_START only (unambiguous): compare caret position vs each range's start and end.
-      for (var i = 0; i < tts.overlayRanges.length; i++) {
-        var r = tts.overlayRanges[i];
+      for (var i = 0; i < ranges.length; i++) {
+        var r = ranges[i];
         if (!r) continue;
         try {
-          // r.start vs caret: <= 0 means r.start is at/before caret
           var startCmp = r.compareBoundaryPoints(Range.START_TO_START, caret);
-          // Build a collapsed range at r's end to compare with caret
           var endAt = document.createRange();
           endAt.setStart(r.endContainer, r.endOffset);
           endAt.collapse(true);
-          // endAt.start vs caret: >= 0 means r.end is at/after caret
           var endCmp = endAt.compareBoundaryPoints(Range.START_TO_START, caret);
           if (startCmp <= 0 && endCmp >= 0) return i;
-        } catch (e) { /* range may be detached; skip */ }
+        } catch (e) {}
       }
       return -1;
     }
 
-    function overlayClickHandler(e) {
-      if (e.target.closest('a, button, input, textarea, select, .tts-btn, .video-card, .diagram')) return;
-      if (!tts.overlayRanges || !tts.overlayBody) return;
-      if (tts.speakingIdx < 0) return;
-      var idx = findSentenceIdxAtPoint(e.clientX, e.clientY);
-      if (idx >= 0) {
-        e.preventDefault();
-        jumpToSentence(tts.speakingIdx, idx);
+    function paintHoverPreview(bodyEl, range) {
+      if (!bodyEl) return;
+      bodyEl.classList.add('tts-highlight-host');
+      var layer = bodyEl.querySelector('.tts-highlight-layer');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.className = 'tts-highlight-layer';
+        bodyEl.appendChild(layer);
+      }
+      // Remove old preview rects but keep the active highlight rects
+      layer.querySelectorAll('.tts-hl-preview-rect').forEach(function(n) { n.remove(); });
+      if (!range) return;
+      var bodyRect = bodyEl.getBoundingClientRect();
+      var clientRects = range.getClientRects();
+      for (var i = 0; i < clientRects.length; i++) {
+        var r = clientRects[i];
+        if (r.width === 0 || r.height === 0) continue;
+        var div = document.createElement('div');
+        div.className = 'tts-hl-preview-rect';
+        div.style.left = (r.left - bodyRect.left + bodyEl.scrollLeft - 2) + 'px';
+        div.style.top = (r.top - bodyRect.top + bodyEl.scrollTop - 1) + 'px';
+        div.style.width = (r.width + 4) + 'px';
+        div.style.height = (r.height + 2) + 'px';
+        layer.appendChild(div);
       }
     }
+
+    function clearHoverPreview(bodyEl) {
+      if (!bodyEl) return;
+      var layer = bodyEl.querySelector('.tts-highlight-layer');
+      if (!layer) return;
+      layer.querySelectorAll('.tts-hl-preview-rect').forEach(function(n) { n.remove(); });
+      // If the layer has no rects left and TTS isn't active here, drop it
+      if (layer.children.length === 0 && tts.overlayBody !== bodyEl) {
+        layer.remove();
+        bodyEl.classList.remove('tts-highlight-host');
+      }
+    }
+
+    function getCardIdxFromBody(bodyEl) {
+      if (!bodyEl) return -1;
+      var card = bodyEl.closest('.explanation-card');
+      if (!card || !card.id) return -1;
+      var n = parseInt(card.id.replace('expCard-', ''), 10);
+      return isNaN(n) ? -1 : n;
+    }
+
+    // ----- Touch drag suppression -----
+    var __ttsLastTouchMoveAt = 0;
+    document.addEventListener('touchmove', function() { __ttsLastTouchMoveAt = Date.now(); }, { passive: true });
+
+    // ----- Hover preview (overlay mode) -----
+    var __ttsHoverState = { body: null, idx: -1, raf: 0 };
+
+    document.addEventListener('mousemove', function(e) {
+      if (TTS_HIGHLIGHT_MODE !== 'overlay') return;
+      if (__ttsHoverState.raf) return; // throttle to one rAF tick
+      __ttsHoverState.raf = requestAnimationFrame(function() {
+        __ttsHoverState.raf = 0;
+        var body = e.target && e.target.closest ? e.target.closest('.explanation-card-body') : null;
+        if (!body) {
+          if (__ttsHoverState.body) clearHoverPreview(__ttsHoverState.body);
+          __ttsHoverState.body = null;
+          __ttsHoverState.idx = -1;
+          return;
+        }
+        var ranges = getOrBuildRangesForBody(body);
+        var idx = findIdxInRanges(ranges, e.clientX, e.clientY);
+        if (body !== __ttsHoverState.body && __ttsHoverState.body) clearHoverPreview(__ttsHoverState.body);
+        __ttsHoverState.body = body;
+        if (idx === __ttsHoverState.idx) return;
+        __ttsHoverState.idx = idx;
+        paintHoverPreview(body, idx >= 0 ? ranges[idx] : null);
+      });
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', function() {
+      if (__ttsHoverState.body) clearHoverPreview(__ttsHoverState.body);
+      __ttsHoverState.body = null; __ttsHoverState.idx = -1;
+    });
+
+    // ----- Click-to-jump / click-to-start (overlay mode) -----
+    document.addEventListener('click', function(e) {
+      if (TTS_HIGHLIGHT_MODE !== 'overlay') return;
+      // Suppress accidental taps that came from a scroll gesture
+      if (Date.now() - __ttsLastTouchMoveAt < 250) return;
+      var body = e.target && e.target.closest ? e.target.closest('.explanation-card-body') : null;
+      if (!body) return;
+      if (e.target.closest('a, button, input, textarea, select, .tts-btn, .video-card, .diagram, .tts-tracker')) return;
+      var cardIdx = getCardIdxFromBody(body);
+      if (cardIdx < 0) return;
+      var ranges = getOrBuildRangesForBody(body);
+      var idx = findIdxInRanges(ranges, e.clientX, e.clientY);
+      if (idx < 0) return;
+      e.preventDefault();
+      if (tts.speakingIdx === cardIdx) {
+        // Already on this card: jump (works whether playing or paused)
+        if (tts.paused && window.speechSynthesis) window.speechSynthesis.resume();
+        tts.paused = false;
+        jumpToSentence(cardIdx, idx);
+      } else {
+        // Different card or stopped: start TTS at clicked sentence
+        toggleTTS(cardIdx, idx);
+      }
+    });
+
+    // ----- ResizeObserver: repaint active rect when body resizes -----
+    var __ttsResizeObs = (typeof ResizeObserver !== 'undefined') ? new ResizeObserver(function() {
+      if (TTS_HIGHLIGHT_MODE !== 'overlay') return;
+      if (tts.overlayBody && tts.overlayRanges && tts.currentSentenceIdx >= 0) {
+        var range = tts.overlayRanges[tts.currentSentenceIdx];
+        if (range) setOverlayHighlight(tts.overlayBody, range);
+      }
+    }) : null;
+    window.addEventListener('resize', function() {
+      if (TTS_HIGHLIGHT_MODE !== 'overlay') return;
+      if (tts.overlayBody && tts.overlayRanges && tts.currentSentenceIdx >= 0) {
+        var range = tts.overlayRanges[tts.currentSentenceIdx];
+        if (range) setOverlayHighlight(tts.overlayBody, range);
+      }
+    });
+
+    // ----- Keyboard nav: [ / ] step prev/next sentence during playback -----
+    document.addEventListener('keydown', function(e) {
+      if (tts.speakingIdx < 0) return;
+      if (e.target && e.target.matches && e.target.matches('input, textarea, select, [contenteditable]')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === '[') {
+        e.preventDefault();
+        var prev = Math.max(0, (tts.currentSentenceIdx || 0) - 1);
+        jumpToSentence(tts.speakingIdx, prev);
+      } else if (e.key === ']') {
+        e.preventDefault();
+        var total = tts.totalSentences || (tts.sentences ? tts.sentences.length : 0);
+        var next = Math.min(total - 1, (tts.currentSentenceIdx || 0) + 1);
+        if (next > (tts.currentSentenceIdx || 0)) jumpToSentence(tts.speakingIdx, next);
+      }
+    });
 
     function setOverlayHighlight(bodyEl, range) {
       if (!bodyEl) return;
@@ -6981,8 +7122,8 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     }
     // ===== End inline TTS overlay =====
 
-    function toggleTTS(idx) {
-      if (tts.speakingIdx === idx) {
+    function toggleTTS(idx, startSent) {
+      if (tts.speakingIdx === idx && (startSent === undefined || startSent === null)) {
         // Stop TTS if already playing this card
         stopTTS();
         return;
@@ -7015,14 +7156,14 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
 
       var sentences;
       if (TTS_HIGHLIGHT_MODE === 'overlay' && bodyEl) {
-        var built = buildSentenceRangesFromBody(bodyEl);
-        if (built.strings.length > 0) {
-          sentences = built.strings;
-          tts.overlayRanges = built.ranges;
+        // Use per-body cached ranges (built lazily by hover/click handler)
+        var ranges = getOrBuildRangesForBody(bodyEl);
+        if (ranges && ranges.length > 0) {
+          sentences = bodyEl.__ttsStrings;
+          tts.overlayRanges = ranges;
           tts.overlayBody = bodyEl;
-          // Click-to-jump: clicking a sentence resumes from there
-          bodyEl.addEventListener('click', overlayClickHandler);
           bodyEl.style.cursor = 'pointer';
+          if (__ttsResizeObs) { try { __ttsResizeObs.observe(bodyEl); } catch (e) {} }
         }
       }
 

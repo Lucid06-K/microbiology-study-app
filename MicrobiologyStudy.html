@@ -8759,36 +8759,12 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     var appInitialized = false;
     var userLoaded = false;
 
-    // ===== TEMP: LOCAL DEV AUTH BYPASS =====
-    // Set BYPASS_AUTH = false (or delete this block) to restore Google sign-in.
-    var BYPASS_AUTH = true;
-    if (BYPASS_AUTH) {
-      var loginScreenEl = document.getElementById('loginScreen');
-      var appContainerEl = document.getElementById('appContainer');
-      if (loginScreenEl) loginScreenEl.style.display = 'none';
-      if (appContainerEl) appContainerEl.style.display = '';
-      var nameEl = document.getElementById('userName');
-      var ddName = document.getElementById('userDropdownName');
-      var ddEmail = document.getElementById('userDropdownEmail');
-      if (nameEl) nameEl.textContent = 'Local';
-      if (ddName) ddName.textContent = 'Local user';
-      if (ddEmail) ddEmail.textContent = 'auth bypassed';
-      if (!appInitialized) {
-        appInitialized = true;
-        init();
-        initPomodoro();
-        initScrollTopBtn();
-      }
-    }
-    // ===== END BYPASS =====
-
     // Sync TTS mode toggle UI with persisted preference
     if (typeof setTTSHighlightMode === 'function') {
       setTTSHighlightMode(TTS_HIGHLIGHT_MODE);
     }
 
     auth.onAuthStateChanged(function(user) {
-      if (BYPASS_AUTH) return;
       if (user) {
         currentUser = user;
         // Hide login, show app

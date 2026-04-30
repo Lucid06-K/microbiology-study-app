@@ -6919,25 +6919,36 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       if (!tts.overlayRanges) return -1;
       var caret = getCaretRangeAt(x, y);
       if (!caret) return -1;
+      // Use START_TO_START only (unambiguous): compare caret position vs each range's start and end.
       for (var i = 0; i < tts.overlayRanges.length; i++) {
         var r = tts.overlayRanges[i];
         if (!r) continue;
         try {
-          if (r.compareBoundaryPoints(Range.START_TO_START, caret) <= 0 &&
-              r.compareBoundaryPoints(Range.END_TO_START, caret) >= 0) {
-            return i;
-          }
+          // r.start vs caret: <= 0 means r.start is at/before caret
+          var startCmp = r.compareBoundaryPoints(Range.START_TO_START, caret);
+          // Build a collapsed range at r's end to compare with caret
+          var endAt = document.createRange();
+          endAt.setStart(r.endContainer, r.endOffset);
+          endAt.collapse(true);
+          // endAt.start vs caret: >= 0 means r.end is at/after caret
+          var endCmp = endAt.compareBoundaryPoints(Range.START_TO_START, caret);
+          if (startCmp <= 0 && endCmp >= 0) return i;
         } catch (e) { /* range may be detached; skip */ }
       }
       return -1;
     }
 
     function overlayClickHandler(e) {
+      console.log('[TTS] click', { target: e.target, x: e.clientX, y: e.clientY, mode: TTS_HIGHLIGHT_MODE, hasRanges: !!tts.overlayRanges, rangeCount: tts.overlayRanges ? tts.overlayRanges.length : 0, speakingIdx: tts.speakingIdx });
       // Don't hijack interactive elements
-      if (e.target.closest('a, button, input, textarea, select, .tts-btn, .video-card, .diagram')) return;
-      if (!tts.overlayRanges || !tts.overlayBody) return;
-      if (tts.speakingIdx < 0) return;
+      if (e.target.closest('a, button, input, textarea, select, .tts-btn, .video-card, .diagram')) {
+        console.log('[TTS] click ignored: interactive child');
+        return;
+      }
+      if (!tts.overlayRanges || !tts.overlayBody) { console.log('[TTS] click ignored: no overlay state'); return; }
+      if (tts.speakingIdx < 0) { console.log('[TTS] click ignored: not speaking'); return; }
       var idx = findSentenceIdxAtPoint(e.clientX, e.clientY);
+      console.log('[TTS] resolved sentence idx:', idx);
       if (idx >= 0) {
         e.preventDefault();
         jumpToSentence(tts.speakingIdx, idx);
@@ -6977,6 +6988,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
     // ===== End inline TTS overlay =====
 
     function toggleTTS(idx) {
+      console.log('[TTS] toggleTTS called for idx', idx, 'mode=', TTS_HIGHLIGHT_MODE, 'serverAvailable=', tts.serverAvailable);
       if (tts.speakingIdx === idx) {
         // Stop TTS if already playing this card
         stopTTS();
@@ -7011,6 +7023,7 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
       var sentences;
       if (TTS_HIGHLIGHT_MODE === 'overlay' && bodyEl) {
         var built = buildSentenceRangesFromBody(bodyEl);
+        console.log('[TTS] built ranges:', built.strings.length, 'sentences');
         if (built.strings.length > 0) {
           sentences = built.strings;
           tts.overlayRanges = built.ranges;
@@ -7018,7 +7031,10 @@ Use drugs only when necessary. Over-reliance leads to resistance. Small parasite
           // Click-to-jump: clicking a sentence resumes from there
           bodyEl.addEventListener('click', overlayClickHandler);
           bodyEl.style.cursor = 'pointer';
+          console.log('[TTS] click listener attached to', bodyEl);
         }
+      } else {
+        console.log('[TTS] overlay setup skipped: mode=', TTS_HIGHLIGHT_MODE, 'bodyEl=', !!bodyEl);
       }
 
       if (!sentences) {
